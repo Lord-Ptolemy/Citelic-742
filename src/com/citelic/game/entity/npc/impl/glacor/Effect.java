@@ -1,0 +1,1 @@
+package com.citelic.game.entity.npc.impl.glacor;import com.citelic.game.entity.Entity;import com.citelic.game.entity.npc.NPC;public abstract interface Effect {	void processEffect(NPC npc, Entity target);}

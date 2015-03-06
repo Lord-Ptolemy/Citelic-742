@@ -1,0 +1,1210 @@
+package com.citelic.game.entity.player.appearance;
+
+import java.io.Serializable;
+import java.util.Arrays;
+
+import com.citelic.cache.impl.ClientScriptMap;
+import com.citelic.cache.impl.NPCDefinitions;
+import com.citelic.cache.impl.item.ItemDefinitions;
+import com.citelic.cache.impl.item.ItemsEquipIds;
+import com.citelic.game.engine.Engine;
+import com.citelic.game.entity.player.Equipment;
+import com.citelic.game.entity.player.Player;
+import com.citelic.game.entity.player.content.socialization.clans.ClansManager;
+import com.citelic.game.entity.player.item.Item;
+import com.citelic.networking.streaming.OutputStream;
+import com.citelic.utility.Utilities;
+
+public class Appearance implements Serializable {
+
+	/**
+	 * The serial UID
+	 */
+	private static final long serialVersionUID = 7655608569741626586L;
+
+	/**
+	 * The emote at which the player is rendered at
+	 */
+	private transient int renderEmote;
+	/**
+	 * The player's title
+	 */
+	private int title;
+	/**
+	 * The player's body looks.
+	 */
+	private int[] bodyStyle;
+	/**
+	 * The cosmetic items
+	 */
+	private Item[] cosmeticItems;
+	/**
+	 * The player's body color
+	 */
+	private byte[] bodyColors;
+	/**
+	 * If the player's gender is a male
+	 */
+	private boolean male;
+	/**
+	 * If the player's eyes glow red
+	 */
+	private transient boolean glowRed;
+	/**
+	 * The appearance block
+	 */
+	private transient byte[] appearanceData;
+	/**
+	 * The encyrpted appearance block
+	 */
+	private transient byte[] md5AppeareanceDataHash;
+	/**
+	 * The NPC the player is transformed into
+	 */
+	private transient short asNPC;
+	/**
+	 * If we should skip the character block
+	 */
+	private transient boolean hidePlayer;
+	/**
+	 * If we should show the player's skill level rather then combat level
+	 */
+	private boolean showSkillLevel;
+	/**
+	 * The player being appearance rendered
+	 */
+	private transient Player player;
+
+	/**
+	 * Constructs a new {@code PlayerAppearance} object
+	 */
+	public Appearance() {
+		male = true;
+		renderEmote = -1;
+		title = -1;
+		resetAppearance();
+	}
+
+	/**
+	 * Sets the npc mask
+	 *
+	 * @param id
+	 *            The NPC to set
+	 */
+	public void asNPC(int id) {
+		asNPC = (short) id;
+		generateAppearanceData();
+	}
+
+	public void copyColors(short[] colors) {
+		for (byte i = 0; i < bodyColors.length; i = (byte) (i + 1))
+			if (colors[i] != -1) {
+				bodyColors[i] = (byte) colors[i];
+			}
+	}
+
+	/**
+	 * Sets the player to a female
+	 */
+	public void female() {
+		bodyStyle[0] = 48;
+		bodyStyle[1] = 57;
+		bodyStyle[2] = 57;
+		bodyStyle[3] = 65;
+		bodyStyle[4] = 68;
+		bodyStyle[5] = 77;
+		bodyStyle[6] = 80;
+		bodyColors[2] = 16;
+		bodyColors[1] = 16;
+		bodyColors[0] = 3;
+		male = false;
+	}
+
+	/**
+	 * Returns the loaded appearance block
+	 *
+	 * @return The appearance block
+	 */
+	public byte[] getAppearanceData() {
+		return appearanceData;
+	}
+
+	/**
+	 * Returns the player's beard style
+	 *
+	 * @return The beard style
+	 */
+	public int getBeardStyle() {
+		return bodyStyle[1];
+	}
+
+	/**
+	 * Returns the cosmetic item corresponding to the specified slot
+	 *
+	 * @param slot
+	 *            The slot to get
+	 * @return The cosmetic item
+	 */
+	public Item getCosmeticItem(int slot) {
+		return cosmeticItems[slot];
+	}
+
+	/**
+	 * Returns the player's facial hair style
+	 *
+	 * @return The facial hair style
+	 */
+	public int getFacialHair() {
+		return bodyStyle[1];
+	}
+
+	/**
+	 * Returns the loaded encrypted appearance block
+	 *
+	 * @return The encrypted appearance block
+	 */
+	public byte[] getMD5AppearanceDataHash() {
+		return md5AppeareanceDataHash;
+	}
+
+	/**
+	 * Returns the player's hair color
+	 *
+	 * @return The hair color
+	 */
+	public int getHairColor() {
+		return bodyColors[0];
+	}
+
+	/**
+	 * Sets the player's hair style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public int getHairStyle() {
+		return bodyStyle[0];
+	}
+
+	/**
+	 * Returns the render emote of this player, or if the player has an NPC
+	 * appearance then we return the NPC's render
+	 *
+	 * @return The render emote
+	 */
+	public int getRenderEmote() {
+		if (renderEmote >= 0)
+			return renderEmote;
+		if (asNPC >= 0)
+			return NPCDefinitions.getNPCDefinitions(asNPC).renderEmote;
+		return player.getEquipment().getWeaponRenderEmote();
+	}
+
+	/**
+	 * Returns the size of this player
+	 *
+	 * @return The size
+	 */
+	public int getSize() {
+		if (asNPC >= 0)
+			return NPCDefinitions.getNPCDefinitions(asNPC).size;
+		return 1;
+	}
+
+	/**
+	 * Returns the player's skin colors
+	 *
+	 * @return The skin colors to set
+	 */
+	public int getSkinColor() {
+		return bodyColors[4];
+	}
+
+	/**
+	 * Retruns the title
+	 *
+	 * @return The title
+	 */
+	public int getTitle() {
+		return title;
+	}
+
+	/**
+	 * Returns the player's top style
+	 *
+	 * @return The style to set
+	 */
+	public int getTopStyle() {
+		return bodyStyle[2];
+	}
+
+	/**
+	 * If this player's eyes glow red
+	 *
+	 * @return True if so; false otherwise
+	 */
+	public boolean isGlowRed() {
+		return glowRed;
+	}
+
+	/**
+	 * If this player is hidden
+	 *
+	 * @return True if hidden; false otherwise
+	 */
+	public boolean isHidden() {
+		return hidePlayer;
+	}
+
+	/**
+	 * If the player is a male
+	 *
+	 * @return True if so; false otherwise
+	 */
+	public boolean isMale() {
+		return male;
+	}
+
+	/**
+	 * If we are showing the skill level as apposed to the combat level
+	 *
+	 * @return True if so; false otherwise
+	 */
+	public boolean isShowSkillLevel() {
+		return showSkillLevel;
+	}
+
+	/**
+	 * Loads this player's appearance to a buffer and is sent to the client
+	 * within a packet containing information on how this player should be
+	 * viewed as graphically
+	 */
+	public void generateAppearanceData() {
+		OutputStream stream = new OutputStream();
+		writeFlags(stream);
+		/**
+		 * If there is no title we skip the title block
+		 */
+		if (title != 0) {
+			writeTitle(stream);
+		}
+		/**
+		 * Writes the skull of this player
+		 */
+		writeSkull(stream);
+		/**
+		 * If there is no NPC we skip the NPC wrap block
+		 */
+		if (asNPC >= 0) {
+			writeNPCData(stream);
+			/**
+			 * Instead we write the player's equipment
+			 */
+		} else {
+			writeEquipment(stream);
+			writeEquipmentAppearence(stream);
+		}
+		/**
+		 * Writing the player's body, username, and landscape flags (pvp,
+		 * non-pvp)
+		 */
+		writeBodyColors(stream);
+		writeCharacter(stream);
+		writeLandscapeFlags(stream);
+		/**
+		 * If there is an NPC to write then we will write it's cached data
+		 */
+		writeCachedNPCFlags(stream);
+		/**
+		 * Saving the appearance buffer
+		 */
+		byte[] appeareanceData = new byte[stream.getOffset()];
+		System.arraycopy(stream.getBuffer(), 0, appeareanceData, 0,
+				appeareanceData.length);
+		byte[] md5Hash = Utilities.encryptUsingMD5(appeareanceData);
+		appearanceData = appeareanceData;
+		md5AppeareanceDataHash = md5Hash;
+	}
+
+	/**
+	 * If the aura needs a model update
+	 *
+	 * @return True if so; false otherwise
+	 */
+	private boolean needsAuraModelUpdate() {
+		int auraId = player.getEquipment().getAuraId();
+		if (auraId == -1 || !player.getAuraManager().isActivated())
+			return false;
+		ItemDefinitions auraDefs = ItemDefinitions.getItemDefinitions(auraId);
+		if (auraDefs.getMaleWornModelId1() == -1
+				|| auraDefs.getFemaleWornModelId1() == -1)
+			return false;
+		return true;
+	}
+
+	/**
+	 * If the cape needs a model update
+	 *
+	 * @return True if so; false otherwise
+	 */
+	private boolean needsCapeModelUpdate() {
+		int capeId = player.getEquipment().getCapeId();
+		ItemDefinitions defs = ItemDefinitions.getItemDefinitions(capeId);
+		if (capeId != 20767 && capeId != 20769 && capeId != 20771)
+			return false;
+		else if (capeId == 20767
+				&& Arrays.equals(player.getMaxedCapeCustomized(),
+						defs.originalModelColors)
+				|| (capeId == 20769 || capeId == 20771)
+				&& Arrays.equals(player.getCompletionistCapeCustomized(),
+						defs.originalModelColors))
+			return false;
+		return true;
+	}
+
+	/**
+	 * If the helmet needs a model update
+	 *
+	 * @return True if so; false otherwise
+	 */
+	private boolean needsHatModelUpdate() {
+		int hatId = player.getEquipment().getHatId();
+		if (hatId != 20768 && hatId != 20770 && hatId != 20772)
+			return false;
+		ItemDefinitions defs = ItemDefinitions.getItemDefinitions(hatId - 1);
+		if (hatId == 20768
+				&& Arrays.equals(player.getMaxedCapeCustomized(),
+						defs.originalModelColors)
+				|| (hatId == 20770 || hatId == 20772)
+				&& Arrays.equals(player.getCompletionistCapeCustomized(),
+						defs.originalModelColors))
+			return false;
+		return true;
+	}
+
+	/**
+	 * If the equiped weapon needs a model update
+	 *
+	 * @return True if so; false otherwise
+	 */
+	private boolean needsWeaponModelUpdate() {
+		int weapon = player.getEquipment().getWeaponId();
+		ItemDefinitions.getItemDefinitions(weapon);
+		if (weapon != 20709)
+			return false;
+		return true;
+	}
+
+	public void print() {
+		for (int i = 0; i < bodyStyle.length; i++) {
+			System.out.println("look[" + i + " ] = " + bodyStyle[i] + ";");
+		}
+		for (int i = 0; i < bodyColors.length; i++) {
+			System.out.println("colour[" + i + " ] = " + bodyColors[i] + ";");
+		}
+	}
+
+	/**
+	 * Resets the appearance flags
+	 */
+	public void resetAppearance() {
+		bodyStyle = new int[7];
+		bodyColors = new byte[10];
+		if (cosmeticItems == null) {
+			cosmeticItems = new Item[14];
+		}
+		this.setMale();
+	}
+
+	/**
+	 * Clears the cosmetic data
+	 */
+	public void resetCosmetics() {
+		cosmeticItems = new Item[14];
+		generateAppearanceData();
+	}
+
+	/**
+	 * Sets the player's arm style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setArmsStyle(int i) {
+		bodyStyle[3] = i;
+	}
+
+	/**
+	 * Sets the player's beard style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setBeardStyle(int i) {
+		bodyStyle[1] = i;
+	}
+
+	/**
+	 * Sets the player's body color
+	 *
+	 * @param i
+	 *            The slot
+	 * @param i2
+	 *            The color
+	 */
+	public void setBodyColor(int i, int i2) {
+		bodyColors[i] = (byte) i2;
+	}
+
+	/**
+	 * Sets the player's body style
+	 *
+	 * @param i
+	 *            The slot
+	 * @param i2
+	 *            The style
+	 */
+	public void setBodyStyle(int i, int i2) {
+		bodyStyle[i] = i2;
+	}
+
+	/**
+	 * Sets a specified slot as cosmetic
+	 *
+	 * @param item
+	 *            The cosmetic item
+	 * @param slot
+	 *            The slot to set
+	 */
+	public void setCosmetic(Item item, int slot) {
+		cosmeticItems[slot] = item;
+	}
+
+	/**
+	 * Sets the player's facial hair style
+	 *
+	 * @param i
+	 *            The facial hair style to set
+	 */
+	public void setFacialHair(int i) {
+		bodyStyle[1] = i;
+	}
+
+	/**
+	 * Sets the glow red flag
+	 *
+	 * @param glowRed
+	 *            True or false
+	 */
+	public void setGlowRed(boolean glowRed) {
+		this.glowRed = glowRed;
+		generateAppearanceData();
+	}
+
+	/**
+	 * Sets the player's hair color
+	 *
+	 * @param color
+	 *            The color to set
+	 */
+	public void setHairColor(int color) {
+		bodyColors[0] = (byte) color;
+	}
+
+	/**
+	 * Sets the hair style
+	 *
+	 * @param i
+	 *            The hair style to set
+	 */
+	public void setHairStyle(int i) {
+		bodyStyle[0] = i;
+	}
+
+	public void setHidden(boolean hidden) {
+		hidePlayer = hidden;
+		generateAppearanceData();
+	}
+
+	/**
+	 * Sets the player's leg color
+	 *
+	 * @param color
+	 *            The color to set
+	 */
+	public void setLegsColor(int color) {
+		bodyColors[2] = (byte) color;
+	}
+
+	/**
+	 * Sets the player's leg style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setLegsStyle(int i) {
+		bodyStyle[5] = i;
+	}
+
+	public void setLooks(short[] look) {
+		for (byte i = 0; i < bodyStyle.length; i = (byte) (i + 1))
+			if (look[i] != -1) {
+				bodyStyle[i] = look[i];
+			}
+	}
+
+	/**
+	 * Sets the player to a male
+	 */
+	public void setMale() {
+		bodyStyle[0] = 3;
+		bodyStyle[1] = 14;
+		bodyStyle[2] = 18;
+		bodyStyle[3] = 26;
+		bodyStyle[4] = 34;
+		bodyStyle[5] = 38;
+		bodyStyle[6] = 42;
+
+		bodyColors[2] = 16;
+		bodyColors[1] = 16;
+		bodyColors[0] = 3;
+		male = true;
+	}
+
+	/**
+	 * Sets the player's gender
+	 *
+	 * @param male
+	 *            If the player is male
+	 */
+	public void setMale(boolean male) {
+		this.male = male;
+	}
+
+	/**
+	 * Sets the player
+	 *
+	 * @param player
+	 *            The player to set
+	 */
+	public void setPlayer(Player player) {
+		this.player = player;
+		asNPC = -1;
+		renderEmote = -1;
+		if (bodyStyle == null || cosmeticItems == null) {
+			resetAppearance();
+		}
+	}
+
+	/**
+	 * Sets the render emote of this player
+	 *
+	 * @param id
+	 *            The id of the render emote to set
+	 */
+	public void setRenderEmote(int id) {
+		renderEmote = id;
+		generateAppearanceData();
+	}
+
+	/**
+	 * Sets the player's leg style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setShoeStyle(int i) {
+		bodyStyle[6] = i;
+	}
+
+	/**
+	 * Sets if we should show the skill level
+	 *
+	 * @param showSkillLevel
+	 *            If we should show the skill level
+	 */
+	public void setShowSkillLevel(boolean showSkillLevel) {
+		this.showSkillLevel = showSkillLevel;
+	}
+
+	/**
+	 * Sets the player's body color
+	 *
+	 * @param color
+	 *            The color to set
+	 */
+	public void setSkinColor(int color) {
+		bodyColors[4] = (byte) color;
+	}
+
+	/**
+	 * Sets the player's title
+	 *
+	 * @param title
+	 *            The title to set
+	 */
+	public void setTitle(int title) {
+		this.title = title;
+		generateAppearanceData();
+	}
+
+	/**
+	 * Sets the player's top color
+	 *
+	 * @param color
+	 *            The color to set
+	 */
+	public void setTopColor(int color) {
+		bodyColors[1] = (byte) color;
+	}
+
+	/**
+	 * Sets the player's top style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setTopStyle(int i) {
+		bodyStyle[2] = i;
+	}
+
+	/**
+	 * Sets the player's wrist style
+	 *
+	 * @param i
+	 *            The style to set
+	 */
+	public void setWristsStyle(int i) {
+		bodyStyle[4] = i;
+	}
+
+	/**
+	 * Hides and unhides the player
+	 */
+	public void switchHidden() {
+		hidePlayer = !hidePlayer;
+		generateAppearanceData();
+	}
+
+	/**
+	 * Toggles showing skills levels.
+	 */
+	public void switchShowingSkill() {
+		showSkillLevel = !showSkillLevel;
+		generateAppearanceData();
+	}
+
+	public void transformIntoNPC(int id) {
+		generateAppearanceData();
+	}
+
+	/**
+	 * Writes the aura model data to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 * @param auraId
+	 *            The aura to authiticate
+	 */
+	private void writeAuraModelData(OutputStream stream, int auraId) {
+		ItemDefinitions auraDefs = ItemDefinitions.getItemDefinitions(auraId);
+		stream.writeByte(0x1);
+		int modelId = player.getAuraManager().getAuraModelId();
+		stream.writeBigSmart(modelId);
+		stream.writeBigSmart(modelId);
+		if (auraDefs.getMaleWornModelId2() != -1
+				|| auraDefs.getFemaleWornModelId2() != -1) {
+			int modelId2 = player.getAuraManager().getAuraModelId2();
+			stream.writeBigSmart(modelId2);
+			stream.writeBigSmart(modelId2);
+		}
+	}
+
+	/**
+	 * Writes the body colors of the player
+	 *
+	 * @param stream
+	 *            The stream to write data on
+	 */
+	private void writeBodyColors(OutputStream stream) {
+		for (int index = 0; index < bodyColors.length; index++) {
+			stream.writeByte(bodyColors[index]);
+		}
+	}
+
+	/**
+	 * Writes the NPC flags if there is an NPC buffer to write
+	 *
+	 * @param stream
+	 *            The stream to write data on
+	 */
+	private void writeCachedNPCFlags(OutputStream stream) {
+		stream.writeByte(asNPC >= 0 ? 1 : 0);
+		if (asNPC >= 0) {
+			NPCDefinitions defs = NPCDefinitions.getNPCDefinitions(asNPC);
+			/**
+			 * Unknown NPC variables are written to the client ensuring the NPC
+			 * we are appearing as
+			 */
+			stream.writeShort(defs.anInt876);
+			stream.writeShort(defs.anInt842);
+			stream.writeShort(defs.anInt884);
+			stream.writeShort(defs.anInt875);
+			stream.writeByte(defs.anInt875);
+		}
+	}
+
+	/**
+	 * Writes the cape model data to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 * @param auraId
+	 *            The cape to authiticate
+	 */
+	private void writeCapeModelData(OutputStream stream, int itemId) {
+		switch (itemId) {
+		case 20708:
+			ClansManager manager = player.getClanManager();
+			if (manager == null)
+				return;
+			int[] colors = manager.getClan().getMottifColors();
+			ItemDefinitions defs = ItemDefinitions.getItemDefinitions(20709);
+			boolean modifyColor = !Arrays.equals(colors,
+					defs.originalModelColors);
+			int bottom = manager.getClan().getMottifBottom();
+			int top = manager.getClan().getMottifTop();
+			if (bottom == 0 && top == 0 && !modifyColor)
+				return;
+			stream.writeByte((modifyColor ? 0x4 : 0)
+					| (bottom != 0 || top != 0 ? 0x8 : 0));
+			if (modifyColor) {
+				int slots = 0 | 1 << 4 | 2 << 8 | 3 << 12;
+				stream.writeShort(slots);
+				for (int i = 0; i < 4; i++)
+					stream.writeShort(colors[i]);
+			}
+			if (bottom != 0 || top != 0) {
+				int slots = 0 | 1 << 4;
+				stream.writeByte(slots);
+				stream.writeShort(ClansManager.getMottifTexture(top));
+				stream.writeShort(ClansManager.getMottifTexture(bottom));
+			}
+			break;
+		case 20767:
+		case 20769:
+		case 20771:
+			stream.writeByte(0x4);
+			int[] cape = itemId == 20767 ? player.getMaxedCapeCustomized()
+					: player.getCompletionistCapeCustomized();
+			int slots = 0 | 1 << 4 | 2 << 8 | 3 << 12;
+			stream.writeShort(slots);
+			/**
+			 * Encoding the colors
+			 */
+			for (int i = 0; i < 4; i++) {
+				stream.writeShort(cape[i]);
+			}
+			break;
+		}
+	}
+
+	/**
+	 * Writes the character render and display name to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data on
+	 */
+	private void writeCharacter(OutputStream stream) {
+		stream.writeShort(getRenderEmote());
+		stream.writeString(player.getDisplayName());
+	}
+
+	/**
+	 * Writes the player's equipment to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 */
+	private void writeEquipment(OutputStream stream) {
+		for (int index = 0; index < 4; index++) {
+			Item item = player.getEquipment().getItems().get(index);
+			if (item != null) {
+				if (cosmeticItems[index] != null) {
+					item = cosmeticItems[index];
+				}
+			}
+			if (glowRed) {
+				if (index == 0) {
+					stream.writeShort(32768 + ItemsEquipIds.getEquipId(2910));
+					continue;
+				}
+				if (index == 1) {
+					stream.writeShort(32768 + ItemsEquipIds.getEquipId(14641));
+					continue;
+				}
+			}
+			if (item == null) {
+				stream.writeByte(0);
+			} else {
+				stream.writeShort(32768 + item.getEquipId());
+			}
+		}
+	}
+
+	/**
+	 * Writes the player's equipment appearance
+	 *
+	 * @param stream
+	 *            The stream to write data on
+	 */
+	private void writeEquipmentAppearence(OutputStream stream) {
+		/**
+		 * Writes the chest data
+		 */
+		Item item = player.getEquipment().getItems().get(Equipment.SLOT_CHEST);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_CHEST] != null) {
+				item = cosmeticItems[Equipment.SLOT_CHEST];
+			}
+		}
+		stream.writeShort(item == null ? 0x100 + bodyStyle[2] : 32768 + item
+				.getEquipId());
+		/**
+		 * Writes the shield data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_SHIELD);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_SHIELD] != null) {
+				item = cosmeticItems[Equipment.SLOT_SHIELD];
+			}
+		}
+		if (item == null) {
+			stream.writeByte(0);
+		} else {
+			stream.writeShort(32768 + item.getEquipId());
+		}
+		/**
+		 * Writes ANOTHER set of chest data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_CHEST);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_CHEST] != null) {
+				item = cosmeticItems[Equipment.SLOT_CHEST];
+			}
+		}
+		if (item == null || !Equipment.hideArms(item)) {
+			stream.writeShort(0x100 + bodyStyle[3]);
+		} else {
+			stream.writeByte(0);
+		}
+		/**
+		 * Writes the leg data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_LEGS);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_LEGS] != null) {
+				item = cosmeticItems[Equipment.SLOT_LEGS];
+			}
+		}
+		stream.writeShort(glowRed ? 32768 + ItemsEquipIds.getEquipId(2908)
+				: item == null ? 0x100 + bodyStyle[5] : 32768 + item
+						.getEquipId());
+		/**
+		 * Writes the hat, mask, and helmet data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_HAT);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_HAT] != null) {
+				item = cosmeticItems[Equipment.SLOT_HAT];
+			}
+		}
+		if (!glowRed && (item == null || !Equipment.hideHair(item))) {
+			stream.writeShort(0x100 + bodyStyle[0]);
+		} else {
+			stream.writeByte(0);
+		}
+		/**
+		 * Writes the glove data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_HANDS);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_HANDS] != null) {
+				item = cosmeticItems[Equipment.SLOT_HANDS];
+			}
+		}
+		stream.writeShort(glowRed ? 32768 + ItemsEquipIds.getEquipId(2912)
+				: item == null ? 0x100 + bodyStyle[4] : 32768 + item
+						.getEquipId());
+		/**
+		 * Writes the boot data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_FEET);
+		if (item != null) {
+			if (cosmeticItems[Equipment.SLOT_FEET] != null) {
+				item = cosmeticItems[Equipment.SLOT_FEET];
+			}
+		}
+		stream.writeShort(glowRed ? 32768 + ItemsEquipIds.getEquipId(2904)
+				: item == null ? 0x100 + bodyStyle[6] : 32768 + item
+						.getEquipId());
+		/**
+		 * Writes a new set of chest data
+		 */
+		item = player.getEquipment().getItems()
+				.get(male ? Equipment.SLOT_HAT : Equipment.SLOT_CHEST);
+		if (item != null) {
+			if (cosmeticItems[male ? Equipment.SLOT_HAT : Equipment.SLOT_CHEST] != null) {
+				item = cosmeticItems[male ? Equipment.SLOT_HAT
+						: Equipment.SLOT_CHEST];
+			}
+		}
+		if (item == null || male && Equipment.showBear(item)) {
+			stream.writeShort(0x100 + bodyStyle[1]);
+		} else {
+			stream.writeByte(0);
+		}
+		/**
+		 * Writes the aura data
+		 */
+		item = player.getEquipment().getItems().get(Equipment.SLOT_AURA);
+		// you can't have a cosmetic aura lmao
+		if (item == null) {
+			stream.writeByte(0);
+		} else {
+			stream.writeShort(32768 + item.getEquipId());
+		}
+		int pos = stream.getOffset();
+		stream.writeShort(0);
+		int flag = 0;
+		int slotFlag = -1;
+		/**
+		 * Writes extra equipment data
+		 */
+		for (int slotId = 0; slotId < player.getEquipment().getItems()
+				.getSize(); slotId++) {
+			if (Equipment.DISABLED_SLOTS[slotId] != 0) {
+				continue;
+			}
+			slotFlag++;
+			/**
+			 * Extra hat data
+			 */
+			if (slotId == Equipment.SLOT_HAT) {
+				if (!needsHatModelUpdate()) {
+					continue;
+				}
+				/**
+				 * Indicate that we are editing hat flags
+				 */
+				flag |= 1 << slotFlag;
+				/**
+				 * Write the data to the stream, (this includes colors and
+				 * textures)
+				 */
+				writeHatModelData(stream, player.getEquipment().getHatId());
+			} else if (slotId == Equipment.SLOT_CAPE) {
+				/**
+				 * Extra cape data
+				 */
+				if (!needsCapeModelUpdate()) {
+					continue;
+				}
+				/**
+				 * Indicating that we are editing the cape flags
+				 */
+				flag |= 1 << slotFlag;
+				/**
+				 * Write the data to the stream, (this includes colors and
+				 * textures)
+				 */
+				writeCapeModelData(stream, player.getEquipment().getCapeId());
+			} else if (slotId == Equipment.SLOT_AURA) {
+				/**
+				 * Extra aura data
+				 */
+				if (!needsAuraModelUpdate()) {
+					continue;
+				}
+				/**
+				 * Indicated that we are editing the cape flags
+				 */
+				flag |= 1 << slotFlag;
+				/**
+				 * Write the data to the stream, (this includes colors and
+				 * textures)
+				 */
+				writeAuraModelData(stream, player.getEquipment().getAuraId());
+			} else if (slotId == Equipment.SLOT_WEAPON) {
+				/**
+				 * Extra aura data
+				 */
+				if (!needsWeaponModelUpdate()) {
+					continue;
+				}
+				/**
+				 * Indicated that we are editing the cape flags
+				 */
+				flag |= 1 << slotFlag;
+				/**
+				 * Write the data to the stream, (this includes colors and
+				 * textures)
+				 */
+				writeWeaponModelData(stream, player.getEquipment()
+						.getWeaponId());
+			}
+		}
+		/**
+		 * Write the slot flag
+		 */
+		int pos2 = stream.getOffset();
+		stream.setOffset(pos);
+		stream.writeShort(flag);
+		stream.setOffset(pos2);
+	}
+
+	/**
+	 * Writes the player's default flags to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 */
+	private void writeFlags(OutputStream stream) {
+		int flag = 0;
+		if (!male) {
+			/**
+			 * Female flag
+			 */
+			flag |= 0x1;
+		}
+		if (asNPC >= 0 && NPCDefinitions.getNPCDefinitions(asNPC).aBoolean3190) {
+			/**
+			 * Is NPC flag
+			 */
+			flag |= 0x2;
+		}
+		if (showSkillLevel) {
+			flag |= 0x4;
+		}
+		if (title != 0) {
+			/**
+			 * Has title flag
+			 */
+			flag |= title >= 32 && title <= 37 ? 0x80 : 0x40; // after/before
+		}
+		stream.writeByte(flag);
+	}
+
+	/**
+	 * Writes the helmet model data to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 * @param auraId
+	 *            The helmet to authiticate
+	 */
+	private void writeHatModelData(OutputStream stream, int hatId) {
+		/**
+		 * Modify the color data
+		 */
+		stream.writeByte(0x4);
+		int[] hat = hatId == 20768 ? player.getMaxedCapeCustomized() : player
+				.getCompletionistCapeCustomized();
+		int slots = 0 | 1 << 4 | 2 << 8 | 3 << 12;
+		stream.writeShort(slots);
+		for (int i = 0; i < 4; i++) {
+			stream.writeShort(hat[i]);
+		}
+	}
+
+	/**
+	 * Writing the landscape flags, (non PVP or PVP)
+	 *
+	 * @param stream
+	 *            The stream to write data on
+	 */
+	private void writeLandscapeFlags(OutputStream stream) {
+		boolean pvpArea = Engine.isPvpArea(player);
+		stream.writeByte(pvpArea ? player.getSkills().getCombatLevel() : player
+				.getSkills().getCombatLevelWithSummoning());
+		stream.writeByte(pvpArea ? player.getSkills()
+				.getCombatLevelWithSummoning() : 0);
+		stream.writeByte(-1);
+	}
+
+	/**
+	 * Writes the player's NPC data to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 */
+	private void writeNPCData(OutputStream stream) {
+		stream.writeShort(-1);
+		stream.writeShort(asNPC);
+		stream.writeByte(0);
+	}
+
+	/**
+	 * Writes the player's skull to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 */
+	private void writeSkull(OutputStream stream) {
+		stream.writeByte(player.hasSkull() ? player.getSkullId() : -1);
+		stream.writeByte(player.getPrayer().getPrayerHeadIcon());
+		stream.writeByte(hidePlayer ? 1 : 0);
+	}
+
+	/**
+	 * Writes the player's title to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 */
+	private void writeTitle(OutputStream stream) {
+		String titleName = ClientScriptMap.getMap(male ? 1093 : 3872)
+				.getStringValue(title);
+		stream.writeGJString(titleName);
+	}
+
+	/**
+	 * Writes the weapon model data to the stream
+	 *
+	 * @param stream
+	 *            The stream to write data to
+	 * @param weapon
+	 *            The weapon to authiticate
+	 */
+	private void writeWeaponModelData(OutputStream stream, int weapon) {
+		int slotFlag = 0 | 1 << 4 | 2 << 8 | 3 << 12;
+		player.getEquipment().getWeaponId();
+		int flag = 0;
+		/**
+		 * Flag indicated whether we should encode textures or models, 0x4 and
+		 * 0x8 is both.
+		 */
+		flag |= 0x4;
+		flag |= 0x8;
+		stream.writeByte(flag);
+		/**
+		 * The slot flags
+		 */
+		stream.writeShort(slotFlag);
+		/**
+		 * Encoding the colors
+		 */
+		// for (int i = 0; i < 4; i++) {
+		// stream.writeShort(player.getClanCape()[i]);
+		// }
+
+		slotFlag = 0 | 1 << 4;
+		stream.writeByte(slotFlag);
+		/**
+		 * Encoding the textures
+		 */
+		// for (int i = 0; i < 2; i++) {
+		// stream.writeShort(player.getClanCapeTexture()[i]);
+		// }
+	}
+}
