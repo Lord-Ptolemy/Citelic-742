@@ -1,5 +1,5 @@
 # Citelic-742-Server
-Revolutionary game server.
+Revolutionary game server - This source will keep being updated till we think it's done.
 
 # Cache 
 https://mega.co.nz/#!0w1CTK7R!iHloblHgIYhjSHUSm-WZzxthhb485EBpbfv_aZ16p3U 
