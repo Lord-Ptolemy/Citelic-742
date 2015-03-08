@@ -360,7 +360,7 @@ public final class Commands {
 					player.getEquipment().getItems().set(i, items[i]);
 					player.getEquipment().refresh(i);
 				}
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 				return true;
 			case "object":
 				int type = cmd.length > 2 ? Integer.parseInt(cmd[2]) : 10;
@@ -403,7 +403,7 @@ public final class Commands {
 						"Enter the display name you wish:");
 				return true;
 			case "pnpc":
-				player.getGlobalPlayerUpdate().transformIntoNPC(
+				player.getPlayerAppearance().transformIntoNPC(
 						Integer.parseInt(cmd[1]));
 				return true;
 			case "ipban":
@@ -913,10 +913,10 @@ public final class Commands {
 							"You can't use ::hide here.");
 					return true;
 				}
-				player.getGlobalPlayerUpdate().switchHidden();
+				player.getPlayerAppearance().switchHidden();
 				player.getPackets().sendGameMessage(
 						"Am i hidden? "
-								+ player.getGlobalPlayerUpdate().isHidden());
+								+ player.getPlayerAppearance().isHidden());
 				return true;
 			case "unnull":
 			case "sendhome":

@@ -13,7 +13,7 @@ public class PlayerTransformAction extends CutsceneAction {
 
 	@Override
 	public void process(Player player, Object[] cache) {
-		player.getGlobalPlayerUpdate().transformIntoNPC(npcId);
+		player.getPlayerAppearance().transformIntoNPC(npcId);
 	}
 
 }

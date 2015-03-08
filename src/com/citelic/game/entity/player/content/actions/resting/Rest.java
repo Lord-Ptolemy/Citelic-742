@@ -53,10 +53,10 @@ public class Rest extends Action {
 		player.setResting(true);
 		if (player.isUsingZenRest()) {
 			player.setNextAnimation(new Animation(ZEN_DEFS[index][0]));
-			player.getGlobalPlayerUpdate().setRenderEmote(ZEN_DEFS[index][1]);
+			player.getPlayerAppearance().setRenderEmote(ZEN_DEFS[index][1]);
 		} else {
 			player.setNextAnimation(new Animation(REST_DEFS[index][0]));
-			player.getGlobalPlayerUpdate().setRenderEmote(REST_DEFS[index][1]);
+			player.getPlayerAppearance().setRenderEmote(REST_DEFS[index][1]);
 		}
 		return true;
 	}
@@ -64,7 +64,7 @@ public class Rest extends Action {
 	@Override
 	public void stop(Player player) {
 		player.setResting(false);
-		player.getGlobalPlayerUpdate().setRenderEmote(-1);
+		player.getPlayerAppearance().setRenderEmote(-1);
 		player.getEmotesManager().setNextEmoteEnd();
 		if (player.isUsingZenRest()) {
 			player.setNextAnimation(new Animation(ZEN_DEFS[index][2]));

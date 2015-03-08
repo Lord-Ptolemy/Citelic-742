@@ -34,7 +34,7 @@ public final class DisplayNames {
 			cachedNames.remove(player.getDisplayName());
 		}
 		player.setDisplayName(null);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		return true;
 	}
 
@@ -59,7 +59,7 @@ public final class DisplayNames {
 		}
 		player.setDisplayName(player.getDisplayName());
 		FriendChatsManager.refreshChat(player);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		return true;
 	}
 

@@ -96,7 +96,7 @@ public class Prayer implements Serializable {
 		onPrayersCount = 0;
 		player.getPackets().sendGlobalConfig(182, 0);
 		player.getPackets().sendConfig(ancientcurses ? 1582 : 1395, 0);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		resetStatAdjustments();
 	}
 
@@ -690,7 +690,7 @@ public class Prayer implements Serializable {
 				onPrayers[getPrayerBook()][prayerId] = false;
 				closePrayers(prayerId);
 				onPrayersCount--;
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 				player.getPackets().sendSound(2663, 0, 1);
 				return true;
 			}
@@ -848,7 +848,7 @@ public class Prayer implements Serializable {
 			resetDrainPrayer(prayerId);
 			onPrayersCount++;
 			if (needAppearenceGenerate)
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 		} else {
 			quickPrayers[getPrayerBook()][prayerId] = true;
 		}

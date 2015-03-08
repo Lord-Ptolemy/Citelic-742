@@ -44,7 +44,7 @@ public class Listen extends Action {
 		index = Utilities.random(Listen.LISTEN_DEFS.length);
 		player.setListening(true);
 		player.setNextAnimation(new Animation(Listen.LISTEN_DEFS[index][0]));
-		player.getGlobalPlayerUpdater().setRenderEmote(
+		player.getPlayerAppearances().setRenderEmote(
 				Listen.LISTEN_DEFS[index][1]);
 		return true;
 	}
@@ -54,6 +54,6 @@ public class Listen extends Action {
 		player.setListening(false);
 		player.setNextAnimation(new Animation(Listen.LISTEN_DEFS[index][2]));
 		player.getEmotesManager().setNextEmoteEnd();
-		player.getGlobalPlayerUpdater().setRenderEmote(-1);
+		player.getPlayerAppearances().setRenderEmote(-1);
 	}
 }

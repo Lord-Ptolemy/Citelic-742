@@ -172,13 +172,13 @@ public final class BattleTerrace {
 	public static void setAmmo(Player player, Item hood) {
 		player.getEquipment().getItems().set(Equipment.SLOT_ARROWS, hood);
 		player.getEquipment().refresh(Equipment.SLOT_ARROWS);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 	}
 
 	public static void setWeapon(Player player, Item hood) {
 		player.getEquipment().getItems().set(Equipment.SLOT_WEAPON, hood);
 		player.getEquipment().refresh(Equipment.SLOT_WEAPON);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 	}
 
 	public static void startTargetInterface(Player player, Player target,

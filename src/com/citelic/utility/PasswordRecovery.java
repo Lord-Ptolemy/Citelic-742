@@ -17,10 +17,10 @@ public class PasswordRecovery {
 	public static void createConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			String IP = "siriusx-rsps.com";
-			String DB = "jesperr_pwreset";
-			String User = "jesperr_pwreset";
-			String Pass = "Md128ks!!";
+			String IP = "";
+			String DB = "";
+			String User = "";
+			String Pass = "";
 			con = DriverManager.getConnection("jdbc:mysql://" + IP + "/" + DB,
 					User, Pass);
 			stmt = con.createStatement();

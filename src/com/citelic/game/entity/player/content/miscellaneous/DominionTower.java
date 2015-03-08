@@ -237,10 +237,6 @@ public final class DominionTower implements Serializable {
 			return "Please don't hit my face";
 		case 2:
 			return "Argh!";
-		case 3:
-			return "Jesper is a cool guy";
-		case 4:
-			return "Chance isn't a cool guy";
 		default:
 			return "Bring it on!";
 		}
@@ -479,7 +475,7 @@ public final class DominionTower implements Serializable {
 			player.getEquipment().deleteItem(
 					BOSSES[nextBossIndex].item.getId(),
 					BOSSES[nextBossIndex].item.getAmount());
-			player.getGlobalPlayerUpdate().generateAppearenceData();
+			player.getPlayerAppearance().generateAppearenceData();
 		}
 	}
 

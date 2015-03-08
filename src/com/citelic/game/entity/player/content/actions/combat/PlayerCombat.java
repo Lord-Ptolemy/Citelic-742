@@ -3645,7 +3645,7 @@ public class PlayerCombat extends Action {
 		}
 		if (player.getTemporaryAttributtes().get("RingNPC") == Boolean.TRUE) {
 			player.unlock();
-			player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+			player.getPlayerAppearance().transformIntoNPC(-1);
 			player.getTemporaryAttributtes().remove("RingNPC");
 			player.setNextAnimation(new Animation(14884));
 		}
@@ -4150,7 +4150,7 @@ public class PlayerCombat extends Action {
 						player.setNextGraphics(new Graphics(2140));
 						player.getEquipment().getItems().set(3, null);
 						player.getEquipment().refresh(3);
-						player.getGlobalPlayerUpdate().generateAppearenceData();
+						player.getPlayerAppearance().generateAppearenceData();
 						player.applyHit(new Hit(player, Utilities
 								.getRandom(150) + 10, HitLook.REGULAR_DAMAGE));
 						player.setNextAnimation(new Animation(12175));

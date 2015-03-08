@@ -269,7 +269,7 @@ public final class Equipment implements Serializable {
 			items.remove(SLOT_ARROWS, new Item(ammoId, ammount));
 			refresh(SLOT_ARROWS);
 		}
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 	}
 
 	public void reset() {

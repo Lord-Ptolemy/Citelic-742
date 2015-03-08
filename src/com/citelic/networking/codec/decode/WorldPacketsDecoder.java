@@ -1586,7 +1586,7 @@ public final class WorldPacketsDecoder extends Decoder {
 									"The requested title color can only contain numeric and regular characters.");
 				} else {
 					player.settitlecolor(value);
-					player.getGlobalPlayerUpdate().setTitle(12345);
+					player.getPlayerAppearance().setTitle(12345);
 					player.getDialogueManager().startDialogue(
 							"SimpleMessage",
 							"Your title color has been changed to <col="
@@ -1606,11 +1606,11 @@ public final class WorldPacketsDecoder extends Decoder {
 						|| value.toLowerCase().contains("mod")) {
 					player.getDialogueManager().startDialogue("SimpleMessage",
 							"You have entered invaild characters or word.");
-					player.getGlobalPlayerUpdate().setTitle(0);
+					player.getPlayerAppearance().setTitle(0);
 				} else {
 					player.setTitle(value);
-					player.getGlobalPlayerUpdate().setTitle(12345);
-					player.getGlobalPlayerUpdate().generateAppearenceData();
+					player.getPlayerAppearance().setTitle(12345);
+					player.getPlayerAppearance().generateAppearenceData();
 					player.getDialogueManager().startDialogue(
 							"SimpleMessage",
 							"Your title has been changed to "

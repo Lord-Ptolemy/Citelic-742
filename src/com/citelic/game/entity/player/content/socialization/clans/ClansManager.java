@@ -327,7 +327,7 @@ public class ClansManager {
 	public void refreshAllMembersAppearence() {
 		synchronized (this) {
 			for (Player player : membersOnline)
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 		}
 	}
 

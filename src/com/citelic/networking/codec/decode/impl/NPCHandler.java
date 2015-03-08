@@ -426,8 +426,8 @@ public class NPCHandler {
 				if (npc.getId() == 13727) {
 					player.getPackets().sendGameMessage(
 							"Xuan cleared your Loyalty Title.");
-					player.getGlobalPlayerUpdate().setTitle(0);
-					player.getGlobalPlayerUpdate().generateAppearenceData();
+					player.getPlayerAppearance().setTitle(0);
+					player.getPlayerAppearance().generateAppearenceData();
 				}
 				if (npc instanceof GraveStone) {
 					GraveStone grave = (GraveStone) npc;

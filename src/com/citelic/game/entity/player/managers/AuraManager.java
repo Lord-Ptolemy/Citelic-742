@@ -101,7 +101,7 @@ public class AuraManager implements Serializable {
 		if (toId != -1) {
 			player.getEquipment().getItem(Equipment.SLOT_AURA).setId(toId);
 			player.getEquipment().refresh(Equipment.SLOT_AURA);
-			player.getGlobalPlayerUpdate().generateAppearenceData();
+			player.getPlayerAppearance().generateAppearenceData();
 		} else {
 			if (activation != 0) {
 				// TODO message already activated
@@ -123,7 +123,7 @@ public class AuraManager implements Serializable {
 					* 1000);
 			player.setNextAnimation(new Animation(2231));
 			player.setNextGraphics(new Graphics(getActiveGraphic(tier)));
-			player.getGlobalPlayerUpdate().generateAppearenceData();
+			player.getPlayerAppearance().generateAppearenceData();
 		}
 	}
 
@@ -462,12 +462,12 @@ public class AuraManager implements Serializable {
 			player.getPackets().sendGameMessage(
 					"You can't use an aura in a duel!");
 			desactive();
-			player.getGlobalPlayerUpdate().generateAppearenceData();
+			player.getPlayerAppearance().generateAppearenceData();
 		}
 		if (Utilities.currentTimeMillis() < activation)
 			return;
 		desactive();
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 	}
 
 	public void removeAura() {

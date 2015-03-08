@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="data/libs/FileStore.jar"/>
+	<classpathentry kind="lib" path="data/libs/GTLVote.jar"/>
+	<classpathentry kind="lib" path="data/libs/mail.jar"/>
+	<classpathentry kind="lib" path="data/libs/mysql-connector-5.1.22.jar"/>
+	<classpathentry kind="lib" path="data/libs/netty-3.5.2.Final.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

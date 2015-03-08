@@ -48,7 +48,7 @@ public class NomadThrone extends Dialogue {
 			break;
 		case 5:
 			stage = -2;
-			sendPlayerDialogue(9827, "Because Jesper told me about you!");
+			sendPlayerDialogue(9827, "Because Guthix told me about you!");
 			player.getQuestManager().setQuestStage(Quests.NOMADS_REQUIEM, 2);
 			break;
 		default:

@@ -2134,9 +2134,9 @@ public class ButtonHandler {
 		player.getEquipment().getItems().set(slotId, null);
 		player.getEquipment().refresh(slotId);
 		if (item.getId() == 4024) {
-			player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+			player.getPlayerAppearance().transformIntoNPC(-1);
 		}
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		if (RuneCrafting.isTiara(item.getId()))
 			player.getPackets().sendConfig(491, 0);
 		if (slotId == 3)
@@ -2149,9 +2149,9 @@ public class ButtonHandler {
 		player.getEquipment().getItems().set(slotId, null);
 		player.getEquipment().refresh(slotId);
 		if (item.getId() == 4024) {
-			player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+			player.getPlayerAppearance().transformIntoNPC(-1);
 		}
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		if (slotId == 3)
 			player.getCombatDefinitions().desecreaseSpecialAttack(0);
 	}
@@ -2165,7 +2165,7 @@ public class ButtonHandler {
 			return false;
 		if (item.getDefinitions().isNoted()
 				|| !item.getDefinitions().isWearItem(
-						player.getGlobalPlayerUpdate().isMale())) {
+						player.getPlayerAppearance().isMale())) {
 			player.getPackets().sendGameMessage("You can't wear that.");
 			return true;
 		}
@@ -2271,7 +2271,7 @@ public class ButtonHandler {
 		player.getEquipment().getItems().set(targetSlot, item2);
 		player.getEquipment().refresh(targetSlot,
 				targetSlot == 3 ? 5 : targetSlot == 3 ? 0 : 3);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		player.getPackets().sendSound(2240, 0, 1);
 		if (targetSlot == 3)
 			player.getCombatDefinitions().desecreaseSpecialAttack(0);
@@ -2293,7 +2293,7 @@ public class ButtonHandler {
 		}
 		player.getInventory().refreshItems(copy);
 		if (worn) {
-			player.getGlobalPlayerUpdate().generateAppearenceData();
+			player.getPlayerAppearance().generateAppearenceData();
 			player.getPackets().sendSound(2240, 0, 1);
 		}
 	}
@@ -2307,7 +2307,7 @@ public class ButtonHandler {
 			return false;
 		if (item.getDefinitions().isNoted()
 				|| !item.getDefinitions().isWearItem(
-						player.getGlobalPlayerUpdate().isMale())
+						player.getPlayerAppearance().isMale())
 				&& itemId != 4084 && itemId != 4024) {
 			player.getPackets().sendGameMessage("You can't wear that.");
 			return false;
@@ -2323,7 +2323,7 @@ public class ButtonHandler {
 				return false;
 			}
 			targetSlot = 3;
-			player.getGlobalPlayerUpdate().transformIntoNPC(1481);
+			player.getPlayerAppearance().transformIntoNPC(1481);
 			player.getPackets().sendGameMessage(
 					"You transform into a ninja monkey.");
 		}
@@ -2405,7 +2405,7 @@ public class ButtonHandler {
 										.getEquipment().getItem(targetSlot)
 										.getAmount()));
 				if (player.getEquipment().getItem(targetSlot).getId() == 4024) {
-					player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+					player.getPlayerAppearance().transformIntoNPC(-1);
 				}
 			} else
 				player.getInventory()
@@ -2414,7 +2414,7 @@ public class ButtonHandler {
 								.getId(), player.getEquipment()
 								.getItem(targetSlot).getAmount()));
 			if (player.getEquipment().getItem(targetSlot).getId() == 4024) {
-				player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+				player.getPlayerAppearance().transformIntoNPC(-1);
 			}
 			player.getEquipment().getItems().set(targetSlot, null);
 		}

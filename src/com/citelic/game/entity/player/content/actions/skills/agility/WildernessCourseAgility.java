@@ -207,11 +207,11 @@ public class WildernessCourseAgility {
 			public void run() {
 				if (!secondloop) {
 					secondloop = true;
-					player.getGlobalPlayerUpdate().setRenderEmote(155);
+					player.getPlayerAppearance().setRenderEmote(155);
 				} else {
 					if (getStage(player) == 2)
 						setStage(player, 3);
-					player.getGlobalPlayerUpdate().setRenderEmote(-1);
+					player.getPlayerAppearance().setRenderEmote(-1);
 					player.setRunHidden(running);
 					player.getSkills().addXp(Skills.AGILITY,
 							increasedExperience(player, 20));
@@ -227,12 +227,12 @@ public class WildernessCourseAgility {
 	public static void walkBackGate(final Player player, GameObject object) {
 		player.faceObject(object);
 		player.lock();
-		player.getGlobalPlayerUpdate().setRenderEmote(155);
+		player.getPlayerAppearance().setRenderEmote(155);
 		player.addWalkSteps(2998, 3916, -1, false);
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				player.getPackets().sendGameMessage(
 						"You made it safely to the other side.", true);
 				player.unlock();
@@ -246,7 +246,7 @@ public class WildernessCourseAgility {
 			return;
 		player.faceObject(object);
 		player.lock();
-		player.getGlobalPlayerUpdate().setRenderEmote(155);
+		player.getPlayerAppearance().setRenderEmote(155);
 		player.addWalkSteps(2998, 3931, -1, false);
 		player.getPackets().sendGameMessage(
 				"You go through the gate and try to edge over the ridge...",
@@ -254,7 +254,7 @@ public class WildernessCourseAgility {
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				player.getPackets().sendGameMessage(
 						"You skilfully balance across the ridge.", true);
 				player.unlock();

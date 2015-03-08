@@ -504,7 +504,7 @@ public class NPC extends Entity implements Serializable {
 								|| player.isDead()
 								|| player.hasFinished()
 								|| !player.isRunning()
-								|| player.getGlobalPlayerUpdate().isHidden()
+								|| player.getPlayerAppearance().isHidden()
 								|| !Utilities
 										.isOnRange(
 												getX(),

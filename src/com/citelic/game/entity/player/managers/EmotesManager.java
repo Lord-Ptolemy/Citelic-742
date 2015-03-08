@@ -543,7 +543,7 @@ public final class EmotesManager implements Serializable {
 					@Override
 					public void run() {
 						if (step == 1) {
-							player.getGlobalPlayerUpdate().transformIntoNPC(
+							player.getPlayerAppearance().transformIntoNPC(
 									(rand == 0 ? 11227 : (rand == 1 ? 11228
 											: 11229)));
 							player.setNextAnimation(new Animation(
@@ -551,7 +551,7 @@ public final class EmotesManager implements Serializable {
 											: 13194)))));
 						}
 						if (step == 3) {
-							player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+							player.getPlayerAppearance().transformIntoNPC(-1);
 							stop();
 						}
 						step++;
@@ -732,7 +732,7 @@ public final class EmotesManager implements Serializable {
 							player.setNextAnimation(new Animation(356));
 							player.setNextGraphics(new Graphics(307));
 						} else if (step == 2) {
-							player.getGlobalPlayerUpdate().transformIntoNPC(
+							player.getPlayerAppearance().transformIntoNPC(
 									capeId == 20769 ? 1830 : 3372);
 							player.setNextAnimation(new Animation(1174));
 							player.setNextGraphics(new Graphics(1443));
@@ -742,7 +742,7 @@ public final class EmotesManager implements Serializable {
 						} else if (step == 5) {
 							player.getPackets().sendStopCameraShake();
 						} else if (step == 8) {
-							player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+							player.getPlayerAppearance().transformIntoNPC(-1);
 							player.setNextAnimation(new Animation(1175));
 							stop();
 						}
@@ -788,11 +788,11 @@ public final class EmotesManager implements Serializable {
 						player.setNextGraphics(new Graphics(86));
 					} else if (step == 1) {
 						player.setNextAnimation(new Animation(10996));
-						player.getGlobalPlayerUpdate().transformIntoNPC(8499);
+						player.getPlayerAppearance().transformIntoNPC(8499);
 					} else if (step == 6) {
 						player.setNextAnimation(new Animation(10995));
 						player.setNextGraphics(new Graphics(86));
-						player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+						player.getPlayerAppearance().transformIntoNPC(-1);
 						stop();
 					}
 					step++;
@@ -814,7 +814,7 @@ public final class EmotesManager implements Serializable {
 			player.setNextGraphics(new Graphics(2837));
 		} else if (slotId == 51) {// Taskmaster
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 15033 : 15034));
+					.getPlayerAppearance().isMale() ? 15033 : 15034));
 			player.setNextGraphics(new Graphics(2930));
 		} else if (slotId == 52) {// Seal Of Approval
 			player.lock(6);
@@ -828,14 +828,14 @@ public final class EmotesManager implements Serializable {
 					} else if (step == 1) {
 						player.setNextAnimation(new Animation(15106));
 						int randomNumber = Utilities.random(13255, 13260);
-						player.getGlobalPlayerUpdate().transformIntoNPC(
+						player.getPlayerAppearance().transformIntoNPC(
 								randomNumber);
 					} else if (step == 2) {
 						player.setNextAnimation(new Animation(15108));
 					} else if (step == 3) {
 						player.setNextAnimation(new Animation(15105));
 						player.setNextGraphics(new Graphics(1287));
-						player.getGlobalPlayerUpdate().transformIntoNPC(-1);
+						player.getPlayerAppearance().transformIntoNPC(-1);
 						stop();
 					}
 					step++;
@@ -983,12 +983,12 @@ public final class EmotesManager implements Serializable {
 			player.setNextAnimation(new Animation(15424));
 		} else if (slotId == 97) {// Evil Laugh
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 15535 : 15536));
+					.getPlayerAppearance().isMale() ? 15535 : 15536));
 		} else if (slotId == 98) {// Golf Clap
 			player.setNextAnimation(new Animation(15520));
 		} else if (slotId == 99) {// LOLcano
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 15532 : 15533));
+					.getPlayerAppearance().isMale() ? 15532 : 15533));
 			player.setNextGraphics(new Graphics(2191));
 		} else if (slotId == 100) {// Infernal power
 			player.setNextAnimation(new Animation(15529));
@@ -1000,7 +1000,7 @@ public final class EmotesManager implements Serializable {
 			player.setNextAnimation(new Animation(14195));
 		} else if (slotId == 103) {// Scream
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 15526 : 15527));
+					.getPlayerAppearance().isMale() ? 15526 : 15527));
 		} else if (slotId == 104) {// Tornado
 			player.setNextAnimation(new Animation(15530));
 			player.setNextGraphics(new Graphics(2196));
@@ -1009,7 +1009,7 @@ public final class EmotesManager implements Serializable {
 			player.setNextGraphics(new Graphics(2239));
 		} else if (slotId == 106) {// ROFLCopter
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 16373 : 16374));
+					.getPlayerAppearance().isMale() ? 16373 : 16374));
 			player.setNextGraphics(new Graphics(3010));
 		} else if (slotId == 107) {// Nature's Might
 			player.setNextAnimation(new Animation(16376));
@@ -1061,7 +1061,7 @@ public final class EmotesManager implements Serializable {
 			player.setNextAnimation(new Animation(17166));
 		} else if (slotId == 119) {
 			player.setNextAnimation(new Animation(player
-					.getGlobalPlayerUpdate().isMale() ? 17212 : 17213));
+					.getPlayerAppearance().isMale() ? 17212 : 17213));
 			player.setNextGraphics(new Graphics(3257));
 		} else if (slotId == 120) {
 			player.setNextAnimation(new Animation(17186));

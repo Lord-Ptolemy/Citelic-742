@@ -10,7 +10,7 @@ public class DuelControler extends Controller {
 	public void start() {
 		sendInterfaces();
 		player.getPackets().sendPlayerOption("Challenge", 1, false);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 		moved();
 	}
 

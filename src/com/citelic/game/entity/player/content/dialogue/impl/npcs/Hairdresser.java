@@ -77,7 +77,7 @@ public class Hairdresser extends Dialogue {
 	public void start() {
 		npcId = (Integer) parameters[0];
 		sendNPCDialogue(npcId, 9827, "Good afternoon, "
-				+ (player.getGlobalPlayerUpdate().isMale() ? "sir" : "lady")
+				+ (player.getPlayerAppearance().isMale() ? "sir" : "lady")
 				+ ". In need of a haircut or shave, are we?");
 	}
 

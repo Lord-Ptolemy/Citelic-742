@@ -298,7 +298,7 @@ public class NexCombat extends CombatScript {
 							"I demand a blood sacrifice!"));
 					nex.playSound(3293, 2);
 					final Player player = (Player) target;
-					player.getGlobalPlayerUpdater().setGlowRed(true);
+					player.getPlayerAppearances().setGlowRed(true);
 					player.getPackets().sendGameMessage(
 							"Nex has marked you as a sacrifice, RUN!");
 					final int x = player.getX();
@@ -306,7 +306,7 @@ public class NexCombat extends CombatScript {
 					EngineTaskManager.schedule(new EngineTask() {
 						@Override
 						public void run() {
-							player.getGlobalPlayerUpdater().setGlowRed(false);
+							player.getPlayerAppearances().setGlowRed(false);
 							if (x == player.getX() && y == player.getY()) {
 								player.getPackets()
 										.sendGameMessage(

@@ -227,7 +227,7 @@ public final class SoulWarsManager {
 			final Teams team = Teams.values()[id];
 			if ((team.equals(Teams.RED) && object.getId() == 42015)
 					|| (team.equals(Teams.BLUE) && object.getId() == 42018)
-					|| player.getGlobalPlayerUpdater().getTransformedNpcId() != -1)
+					|| player.getPlayerAppearances().getTransformedNpcId() != -1)
 				return;
 			int x = player.getX() + object.getX() - player.getX();
 			if (object.getId() == 42015 ? (object.getX() >= player.getX())
@@ -238,7 +238,7 @@ public final class SoulWarsManager {
 			break;
 		case 42019:
 		case 42020:
-			if (player.getGlobalPlayerUpdater().getTransformedNpcId() != -1
+			if (player.getPlayerAppearances().getTransformedNpcId() != -1
 					|| (object.getId() == 42020 && object.getY() <= player
 							.getY())
 					|| (object.getId() == 42019 && object.getY() >= player

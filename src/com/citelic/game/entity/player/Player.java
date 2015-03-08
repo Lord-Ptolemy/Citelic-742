@@ -234,7 +234,7 @@ public class Player extends Entity {
 	private boolean forceNextMapLoadRefresh;
 	private int friendChatSetup;
 	private final FriendsIgnores friendsIgnores;
-	private PlayerAppearance globalPlayerUpdater;
+	private PlayerAppearance playerAppearance;
 	private boolean gmaulSpecCheapFix;
 	private int gnomeAdvancedLaps;
 	private boolean gotInfernoAdze;
@@ -552,7 +552,7 @@ public class Player extends Entity {
 		setHitpoints(GameConstants.START_PLAYER_HITPOINTS);
 		this.password = password;
 		registeredMac = mac;
-		setGlobalPlayerUpdater(new PlayerAppearance());
+		setPlayerAppearance(new PlayerAppearance());
 		toolbelt = new Toolbelt();
 		inventory = new Inventory();
 		equipment = new Equipment();
@@ -790,7 +790,7 @@ public class Player extends Entity {
 	}
 
 	public PlayerAppearance getAppearence() {
-		return globalPlayerUpdater;
+		return playerAppearance;
 	}
 
 	public int getAssistStatus() {
@@ -994,15 +994,13 @@ public class Player extends Entity {
 		return friendsIgnores;
 	}
 
-	public PlayerAppearance getGlobalPlayerUpdate() {
-		return getGlobalPlayerUpdater();
+	public PlayerAppearance getPlayerAppearance() {
+		return playerAppearance;
 	}
 
-	public PlayerAppearance getGlobalPlayerUpdater() {
-		return globalPlayerUpdater;
+	public PlayerAppearance getPlayerAppearances() {
+		return playerAppearance;
 	}
-
-	// LOL, bad way to do it, dont complain
 
 	public boolean getGmaulSpecCheapFix() {
 		return gmaulSpecCheapFix;
@@ -1411,7 +1409,7 @@ public class Player extends Entity {
 
 	@Override
 	public int getSize() {
-		return getGlobalPlayerUpdater().getSize();
+		return getPlayerAppearances().getSize();
 	}
 
 	public Skills getSkills() {
@@ -2213,10 +2211,10 @@ public class Player extends Entity {
 		auraManager = new AuraManager();
 		dominionTower = new DominionTower();
 		trade = new Trade(this);
-		if (getGlobalPlayerUpdate() == null) {
-			setGlobalPlayerUpdater(new PlayerAppearance());
+		if (getPlayerAppearance() == null) {
+			setPlayerAppearance(new PlayerAppearance());
 		}
-		getGlobalPlayerUpdate().setPlayer(this);
+		getPlayerAppearance().setPlayer(this);
 		getInventory().setPlayer(this);
 		getEquipment().setPlayer(this);
 		getDwarfCannon().setPlayer(this);
@@ -2772,7 +2770,7 @@ public class Player extends Entity {
 		if (hasSkull()) {
 			skullDelay--;
 			if (!hasSkull()) {
-				getGlobalPlayerUpdater().generateAppearenceData();
+				getPlayerAppearances().generateAppearenceData();
 			}
 		}
 		if (polDelay != 0 && polDelay <= Utilities.currentTimeMillis()) {
@@ -3095,7 +3093,7 @@ public class Player extends Entity {
 
 	public void removeSkull() {
 		skullDelay = -1;
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 	}
 
 	@Override
@@ -3134,7 +3132,7 @@ public class Player extends Entity {
 		}
 		setRunEnergy(100);
 		removeDamage(this);
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 	}
 
 	public void resetBankPins() {
@@ -3247,7 +3245,7 @@ public class Player extends Entity {
 		openPin = false;
 		setRunning(true);
 		setUpdateMovementType(true);
-		getGlobalPlayerUpdate().generateAppearenceData();
+		getPlayerAppearance().generateAppearenceData();
 		getControllerManager().login();
 		OwnedObjectManager.linkKeys(this);
 		LoggingSystem.logIP(this);
@@ -3603,7 +3601,7 @@ public class Player extends Entity {
 		final Item[][] items = GraveStone.getItemsKeptOnDeath(this, slots);
 		inventory.reset();
 		equipment.reset();
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 		for (final Item item : items[0]) {
 			if (item != null) {
 				inventory.addItemDrop(item.getId(), item.getAmount(),
@@ -3734,7 +3732,7 @@ public class Player extends Entity {
 
 	public void setCanPvp(boolean canPvp) {
 		this.canPvp = canPvp;
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 		getPackets().sendPlayerOption(canPvp ? "Attack" : "null", 1, true);
 		getPackets().sendPlayerUnderNPCPriority(canPvp);
 	}
@@ -3890,7 +3888,7 @@ public class Player extends Entity {
 	public void setFightPitsSkull() {
 		skullDelay = Integer.MAX_VALUE;
 		skullId = 1;
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 	}
 
 	public void setFilterGame(boolean filterGame) {
@@ -3909,8 +3907,8 @@ public class Player extends Entity {
 		this.friendChatSetup = friendChatSetup;
 	}
 
-	public void setGlobalPlayerUpdater(PlayerAppearance globalPlayerUpdater) {
-		this.globalPlayerUpdater = globalPlayerUpdater;
+	public void setPlayerAppearance(PlayerAppearance globalPlayerUpdater) {
+		this.playerAppearance = globalPlayerUpdater;
 	}
 
 	public void setGnomeAdvancedLaps(int gnomeAdvancedLaps) {
@@ -4278,7 +4276,7 @@ public class Player extends Entity {
 	public void setSkullInfiniteDelay(int skullId) {
 		skullDelay = Integer.MAX_VALUE;
 		this.skullId = skullId;
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 	}
 
 	public void setSlayerPoints(int slayerPoints) {
@@ -4413,7 +4411,7 @@ public class Player extends Entity {
 	public void setWildernessSkull() {
 		skullDelay = 3000;
 		skullId = 0;
-		getGlobalPlayerUpdater().generateAppearenceData();
+		getPlayerAppearances().generateAppearenceData();
 	}
 
 	public void setWonFightPits() {
@@ -4676,7 +4674,7 @@ public class Player extends Entity {
                 }
             }
         }
-        getGlobalPlayerUpdater().generateAppearenceData();
+        getPlayerAppearances().generateAppearenceData();
     }
 
     public boolean hasFamiliar() {

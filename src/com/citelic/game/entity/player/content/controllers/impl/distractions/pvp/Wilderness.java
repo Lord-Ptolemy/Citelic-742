@@ -163,7 +163,7 @@ public class Wilderness extends Controller {
 			showingSkull = true;
 			player.setCanPvp(true);
 			showSkull();
-			player.getGlobalPlayerUpdater().generateAppearenceData();
+			player.getPlayerAppearances().generateAppearenceData();
 		} else if (showingSkull && (isAtWildSafe || !isAtWild)) {
 			removeIcon();
 		} else if (!isAtWildSafe && !isAtWild) {
@@ -270,7 +270,7 @@ public class Wilderness extends Controller {
 			player.setCanPvp(false);
 			player.getPackets().closeInterface(
 					player.getInterfaceManager().hasRezizableScreen() ? 11 : 0);
-			player.getGlobalPlayerUpdater().generateAppearenceData();
+			player.getPlayerAppearances().generateAppearenceData();
 			player.getEquipment().refresh(null);
 		}
 	}

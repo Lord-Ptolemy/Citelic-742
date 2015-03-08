@@ -36,7 +36,7 @@ public class FightPitsViewingOrb extends Action {
 		if (!process(player))
 			return false;
 		tile = new Tile(player);
-		player.getGlobalPlayerUpdate().switchHidden();
+		player.getPlayerAppearance().switchHidden();
 		player.getPackets().sendMiniMapStatus(5);
 		player.setNextTile(ORB_TELEPORTS[0]);
 		player.getInterfaceManager().sendInventoryInterface(374);
@@ -47,7 +47,7 @@ public class FightPitsViewingOrb extends Action {
 	public void stop(final Player player) {
 		player.lock(2);
 		player.getInterfaceManager().closeInventoryInterface();
-		player.getGlobalPlayerUpdate().switchHidden();
+		player.getPlayerAppearance().switchHidden();
 		player.getPackets().sendMiniMapStatus(0);
 		player.setNextTile(tile);
 	}

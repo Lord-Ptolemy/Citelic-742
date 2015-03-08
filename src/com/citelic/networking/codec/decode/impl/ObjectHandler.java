@@ -1990,10 +1990,10 @@ public final class ObjectHandler {
 							public void run() {
 								if (!secondloop) {
 									secondloop = true;
-									player.getGlobalPlayerUpdate().setRenderEmote(
+									player.getPlayerAppearance().setRenderEmote(
 											295);
 								} else {
-									player.getGlobalPlayerUpdate().setRenderEmote(
+									player.getPlayerAppearance().setRenderEmote(
 											-1);
 									player.setRunHidden(running);
 									stop();

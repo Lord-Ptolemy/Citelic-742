@@ -83,7 +83,7 @@ public class BarbarianOutpostAgility {
 		player.setNextForceMovement(new ForceMovement(player, 1, toTile, 3,
 				ForceMovement.EAST));
 		player.setNextAnimation(new Animation(16079));
-		player.getGlobalPlayerUpdate().setRenderEmote(330);
+		player.getPlayerAppearance().setRenderEmote(330);
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
@@ -163,7 +163,7 @@ public class BarbarianOutpostAgility {
 			return;
 		player.lock();
 		player.setNextAnimation(new Animation(2586));
-		player.getGlobalPlayerUpdate().setRenderEmote(-1);
+		player.getPlayerAppearance().setRenderEmote(-1);
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
@@ -308,7 +308,7 @@ public class BarbarianOutpostAgility {
 				true);
 		player.lock();
 		player.setNextAnimation(new Animation(753));
-		player.getGlobalPlayerUpdate().setRenderEmote(157);
+		player.getPlayerAppearance().setRenderEmote(157);
 		final Tile toTile = new Tile(2532, object.getY(), object.getZ());
 		player.setRun(true);
 		player.addWalkSteps(toTile.getX(), toTile.getY(), -1, false);
@@ -316,7 +316,7 @@ public class BarbarianOutpostAgility {
 			@Override
 			public void run() {
 				player.setNextAnimation(new Animation(759));
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				player.getSkills().addXp(Skills.AGILITY, 22);
 				player.getPackets().sendGameMessage(
 						"You skilfully edge across the gap.", true);

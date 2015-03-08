@@ -127,9 +127,9 @@ public class GnomeAgility {
 			public void run() {
 				if (!secondloop) {
 					secondloop = true;
-					player.getGlobalPlayerUpdate().setRenderEmote(295);
+					player.getPlayerAppearance().setRenderEmote(295);
 				} else {
-					player.getGlobalPlayerUpdate().setRenderEmote(-1);
+					player.getPlayerAppearance().setRenderEmote(-1);
 					player.setRunHidden(running);
 					player.getSkills().addXp(Skills.AGILITY, 7.5);
 					if (getGnomeStage(player) == 5) {
@@ -368,9 +368,9 @@ public class GnomeAgility {
 			public void run() {
 				if (!secondloop) {
 					secondloop = true;
-					player.getGlobalPlayerUpdate().setRenderEmote(155);
+					player.getPlayerAppearance().setRenderEmote(155);
 				} else {
-					player.getGlobalPlayerUpdate().setRenderEmote(-1);
+					player.getPlayerAppearance().setRenderEmote(-1);
 					player.setRunHidden(running);
 					player.getSkills().addXp(Skills.AGILITY, 7.5);
 					player.getPackets().sendGameMessage(
@@ -398,9 +398,9 @@ public class GnomeAgility {
 			public void run() {
 				if (!secondloop) {
 					secondloop = true;
-					player.getGlobalPlayerUpdate().setRenderEmote(155);
+					player.getPlayerAppearance().setRenderEmote(155);
 				} else {
-					player.getGlobalPlayerUpdate().setRenderEmote(-1);
+					player.getPlayerAppearance().setRenderEmote(-1);
 					player.setRunHidden(running);
 					setGnomeStage(player, 0);
 					player.getSkills().addXp(Skills.AGILITY, 7.5);
@@ -428,9 +428,9 @@ public class GnomeAgility {
 			public void run() {
 				if (!secondloop) {
 					secondloop = true;
-					player.getGlobalPlayerUpdate().setRenderEmote(155);
+					player.getPlayerAppearance().setRenderEmote(155);
 				} else {
-					player.getGlobalPlayerUpdate().setRenderEmote(-1);
+					player.getPlayerAppearance().setRenderEmote(-1);
 					player.setRunHidden(running);
 					if (getGnomeStage(player) == 2)
 						setGnomeStage(player, 3);

@@ -29,7 +29,7 @@ public class ApeAtollAgility {
 		final Tile toTile = new Tile(2769, 2746, 1);
 		player.setNextForceMovement(new ForceMovement(player, 1, toTile, 7,
 				ForceMovement.NORTH));
-		player.getGlobalPlayerUpdate().setRenderEmote(760);
+		player.getPlayerAppearance().setRenderEmote(760);
 		player.getPackets().sendGameMessage("You climb the vine...");
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
@@ -38,7 +38,7 @@ public class ApeAtollAgility {
 						"..And make it carefully to the end of it.");
 				player.setNextTile(toTile);
 				player.getSkills().addXp(Skills.AGILITY, 55);
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				player.unlock();
 				stop();
 			}
@@ -82,7 +82,7 @@ public class ApeAtollAgility {
 		final Tile toTile = new Tile(2743, 2741, 0);
 		player.setNextForceMovement(new ForceMovement(player, 0, toTile, 3,
 				ForceMovement.WEST));
-		player.getGlobalPlayerUpdate().setRenderEmote(739);
+		player.getPlayerAppearance().setRenderEmote(739);
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
@@ -90,7 +90,7 @@ public class ApeAtollAgility {
 						"You climb up the skull slope.");
 				player.setNextTile(toTile);
 				player.getSkills().addXp(Skills.AGILITY, 45);
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				stop();
 			}
 		}, 2);
@@ -135,14 +135,14 @@ public class ApeAtollAgility {
 		final Tile toTile2 = new Tile(2747, 2741, 2);
 		player.setNextForceMovement(new ForceMovement(player, 0, toTile2, 4,
 				ForceMovement.WEST));
-		player.getGlobalPlayerUpdate().setRenderEmote(744);
+		player.getPlayerAppearance().setRenderEmote(744);
 		player.getPackets().sendGameMessage("You jump to the monkey bars...");
 		EngineTaskManager.schedule(new EngineTask() {
 			@Override
 			public void run() {
 				player.getPackets().sendGameMessage(
 						"..And made it carefully to the other side.");
-				player.getGlobalPlayerUpdate().setRenderEmote(-1);
+				player.getPlayerAppearance().setRenderEmote(-1);
 				player.setNextTile(toTile);
 				player.getSkills().addXp(Skills.AGILITY, 35);
 				stop();
@@ -186,11 +186,11 @@ public class ApeAtollAgility {
 							player.setNextForceMovement(new ForceMovement(
 									player, 0, WaterTile, 3,
 									ForceMovement.NORTH));
-							player.getGlobalPlayerUpdate().setRenderEmote(741);
+							player.getPlayerAppearance().setRenderEmote(741);
 							EngineTaskManager.schedule(new EngineTask() {
 								@Override
 								public void run() {
-									player.getGlobalPlayerUpdate()
+									player.getPlayerAppearance()
 											.setRenderEmote(-1);
 									player.setNextTile(Land);
 									stop();

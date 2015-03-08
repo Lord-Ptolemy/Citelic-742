@@ -136,7 +136,7 @@ public final class Skills implements Serializable {
 			level[skill] += levelDiff;
 			player.getDialogueManager().startDialogue("LevelUp", skill);
 			if (skill == SUMMONING || (skill >= ATTACK && skill <= MAGIC)) {
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 				if (skill == HITPOINTS)
 					player.heal(levelDiff * 10);
 				else if (skill == PRAYER)
@@ -401,7 +401,7 @@ public final class Skills implements Serializable {
 
 	public void refresh(int skill) {
 		player.getPackets().sendSkillLevel(skill);
-		player.getGlobalPlayerUpdate().generateAppearenceData();
+		player.getPlayerAppearance().generateAppearenceData();
 	}
 
 	public void refreshCounterXp(int counter) {
@@ -533,7 +533,7 @@ public final class Skills implements Serializable {
 			level[skill] += levelDiff;
 			player.getDialogueManager().startDialogue("LevelUp", skill);
 			if (skill == SUMMONING || (skill >= ATTACK && skill <= MAGIC)) {
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 				if (skill == HITPOINTS)
 					player.heal(levelDiff * 10);
 				else if (skill == PRAYER)
@@ -600,7 +600,7 @@ public final class Skills implements Serializable {
 			player.getDialogueManager().startDialogue("LevelUp", skill);
 			if (skill == Skills.SUMMONING || skill >= Skills.ATTACK
 					&& skill <= Skills.MAGIC) {
-				player.getGlobalPlayerUpdate().generateAppearenceData();
+				player.getPlayerAppearance().generateAppearenceData();
 				if (skill == Skills.HITPOINTS) {
 					player.heal(levelDiff * 10);
 				} else if (skill == Skills.PRAYER) {
