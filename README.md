@@ -1,4 +1,4 @@
-# Citelic-742-Server
+# Citelic-742
 Revolutionary game server - This source will keep being updated till we think it's done.
 
 # Cache 
