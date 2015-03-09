@@ -872,9 +872,6 @@ public class WorldPacketsEncoder extends Encoder {
 		session.write(stream);
 	}
 
-	public void sendGroundColor() {
-	}
-
 	/*
 	 * sends local npcs update
 	 */

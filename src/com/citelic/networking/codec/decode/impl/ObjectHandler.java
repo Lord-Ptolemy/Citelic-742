@@ -2359,10 +2359,7 @@ public final class ObjectHandler {
 					player.getDialogueManager().startDialogue("MagicPortal");
 				} else if (object.getDefinitions().name
 						.equalsIgnoreCase("Obelisk") && object.getY() > 3525) {
-					// Who the fuck removed the controler class and the code
-					// from SONIC!!!!!!!!!!
-					// That was an hour of collecting coords :fp: Now ima kill
-					// myself.
+
 				} else if (id == 27254) {// Edgeville portal
 					player.getPackets().sendGameMessage(
 							"You enter the portal...");
@@ -2391,7 +2388,7 @@ public final class ObjectHandler {
 					// TREASURE CHEST
 				} else if (id == 29734 && player.getPlane() == 0) {// TREASURE
 																	// CHEST
-					if (player.playerSafety2 == false) {
+					if (player.playerSafety[2] == false) {
 						if (player.getInventory().getFreeSlots() < 4) {
 							player.print("You need some more inventory space to take the contents of this chest.");
 							return;
@@ -2404,7 +2401,7 @@ public final class ObjectHandler {
 						player.getInventory().addItem(12627, 2);
 						player.getInventory().addItem(12629, 1);
 						player.getInventory().addItem(995, 10000);
-						player.playerSafety2 = true;
+						player.playerSafety[2] = true;
 						player.sendByFiles();
 					} else {
 						if (!player.getBank().containsItem(12629, 1)
@@ -2422,8 +2419,8 @@ public final class ObjectHandler {
 					// END
 				} else if (id == 29736) {// Old Lever
 					player.setNextAnimation(new Animation(8804));
-					if (player.playerSafety1 == false) {
-						player.playerSafety1 = true;
+					if (player.playerSafety[1] == false) {
+						player.playerSafety[1] = true;
 						player.lock(3);
 						EngineTaskManager.schedule(new EngineTask() {
 							@Override
@@ -2434,7 +2431,7 @@ public final class ObjectHandler {
 							}
 						}, 3, 0);
 					} else {
-						player.playerSafety1 = false;
+						player.playerSafety[1] = false;
 						player.lock(3);
 						EngineTaskManager.schedule(new EngineTask() {
 							@Override
@@ -2449,7 +2446,7 @@ public final class ObjectHandler {
 				} else if (id == 29624) {// Door
 					if (player.getPlane() == 1 && object.getX() == 3141
 							&& object.getY() == 4272) {
-						if (player.playerSafety1 == false) {
+						if (player.playerSafety[1] == false) {
 							player.print("The door seems to be locked by some kind of mechanism.");
 						} else {
 							player.setNextTile(new Tile(3143, 4270, 0));
@@ -2461,7 +2458,7 @@ public final class ObjectHandler {
 							&& object.getY() == 4266) {
 						player.setNextTile(new Tile(3177, 4269, 2));
 					} else if (player.getPlane() == 2) {
-						if (player.playerSafety1 == false) {
+						if (player.playerSafety[1] == false) {
 							player.print("The door seems to be locked by some kind of mechanism.");
 						} else {
 							player.setNextTile(new Tile(3177, 4266, 0));
@@ -2516,7 +2513,7 @@ public final class ObjectHandler {
 										: object.getY() + 1, -1, false);
 					}
 				} else if (id == 29728 && player.getPlane() == 0) {// CREVICE
-					if (player.playerSafety3 == true) {
+					if (player.playerSafety[3] == true) {
 						player.setNextTile(new Tile(3158, 4279, 3));
 					} else {
 						player.print("You are not sure to go...you should better find a different way");
@@ -2548,7 +2545,7 @@ public final class ObjectHandler {
 				} else if (id == 29671 && player.getPlane() == 3) {// Stairs
 					player.setNextTile(new Tile(3174, 4273, 2));
 				} else if (id == 29729 && player.getPlane() == 3) {// ROPE UP
-					player.playerSafety3 = true;
+					player.playerSafety[3] = true;
 					player.setNextTile(new Tile(3077, 3462, 0));
 					// PROF ROOM
 				} else if (id == 29592 && player.getPlane() == 0) {// Stairs

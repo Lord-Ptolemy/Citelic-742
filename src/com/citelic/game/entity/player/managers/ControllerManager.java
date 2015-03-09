@@ -14,7 +14,7 @@ import com.citelic.game.entity.player.item.Item;
 import com.citelic.game.map.objects.GameObject;
 import com.citelic.game.map.tile.Tile;
 
-public final class ControlerManager implements Serializable {
+public final class ControllerManager implements Serializable {
 
 	private static final long serialVersionUID = 2084691334731830796L;
 
@@ -25,8 +25,8 @@ public final class ControlerManager implements Serializable {
 
 	private String lastController;
 
-	public ControlerManager() {
-		lastController = /* Settings.HOSTED ? */GameConstants.START_CONTROLER;// :
+	public ControllerManager() {
+		lastController = /* Settings.HOSTED ? */GameConstants.START_CONTROLLER;// :
 		// "TutorialIsland";
 		// // se
 	}

@@ -4,7 +4,7 @@ import com.citelic.game.entity.player.Player;
 import com.citelic.game.entity.player.content.controllers.Controller;
 import com.citelic.game.map.tile.Tile;
 
-public class DuelControler extends Controller {
+public class DuelController extends Controller {
 
 	@Override
 	public void start() {
@@ -93,7 +93,7 @@ public class DuelControler extends Controller {
 		if (target == null
 				|| target.hasFinished()
 				|| !target.withinDistance(player, 14)
-				|| !(target.getControllerManager().getController() instanceof DuelControler)) {
+				|| !(target.getControllerManager().getController() instanceof DuelController)) {
 			player.getPackets().sendGameMessage(
 					"Unable to find "
 							+ (target == null ? "your target" : target

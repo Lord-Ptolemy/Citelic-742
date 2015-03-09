@@ -19,7 +19,7 @@ import com.citelic.game.map.tile.Tile;
  * @author Emperor
  * 
  */
-public final class WarControler extends Controller {
+public final class WarController extends Controller {
 
 	/**
 	 * The clan wars instance.
@@ -29,7 +29,7 @@ public final class WarControler extends Controller {
 	/**
 	 * Constructs a new {@code WarControler} {@code Object}.
 	 */
-	public WarControler() {
+	public WarController() {
 		/*
 		 * empty.
 		 */

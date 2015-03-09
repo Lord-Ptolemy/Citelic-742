@@ -20,7 +20,7 @@ public class BorkCombat extends CombatScript {
 			if (target instanceof Player) {
 				Player player = (Player) target;
 				npc.setNextForceTalk(new ForceTalk("Come to my aid, brothers!"));
-				player.getControllerManager().startController("BorkControler",
+				player.getControllerManager().startController("BorkController",
 						1, npc);
 				spawnOrk = true;
 			}

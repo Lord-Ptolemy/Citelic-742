@@ -1574,116 +1574,7 @@ public final class WorldPacketsDecoder extends Decoder {
 				ClansManager.banPlayer(player, value);
 			else if (player.getTemporaryAttributtes().remove("unbanclanplayer") != null)
 				ClansManager.unbanPlayer(player, value);
-			else if (player.getTemporaryAttributtes().get("titlecolor") == Boolean.TRUE) {
-				if (value.length() != 6) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The HEX yell color you wanted to pick cannot be longer and shorter then 6.");
-				} else if (Utilities.containsInvalidCharacter(value)
-						|| value.contains("_")) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The requested title color can only contain numeric and regular characters.");
-				} else {
-					player.settitlecolor(value);
-					player.getPlayerAppearance().setTitle(12345);
-					player.getDialogueManager().startDialogue(
-							"SimpleMessage",
-							"Your title color has been changed to <col="
-									+ player.getTitleColor() + ">"
-									+ player.getTitleColor() + "</col>.");
-				}
-				player.getTemporaryAttributtes().put("titlecolor",
-						Boolean.FALSE);
-			} else if (player.getTemporaryAttributtes().get("customtitle") == Boolean.TRUE) {
-				if (value.length() > 10) {
-					player.getDialogueManager().startDialogue("SimpleMessage",
-							"Titles are limted to ten characters due to spam.");
-				} else if (Utilities.containsInvalidCharacter(value)
-						|| value.contains("_")
-						|| value.toLowerCase().contains("owner")
-						|| value.toLowerCase().contains("admin")
-						|| value.toLowerCase().contains("mod")) {
-					player.getDialogueManager().startDialogue("SimpleMessage",
-							"You have entered invaild characters or word.");
-					player.getPlayerAppearance().setTitle(0);
-				} else {
-					player.setTitle(value);
-					player.getPlayerAppearance().setTitle(12345);
-					player.getPlayerAppearance().generateAppearenceData();
-					player.getDialogueManager().startDialogue(
-							"SimpleMessage",
-							"Your title has been changed to "
-									+ player.getTitle() + ".");
-				}
-				player.getTemporaryAttributtes().put("customTitle",
-						Boolean.FALSE);
-			} else if (player.getTemporaryAttributtes().get("yellcolor") == Boolean.TRUE) {
-				if (value.length() != 6) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The HEX yell color you wanted to pick cannot be longer and shorter then 6.");
-				} else if (Utilities.containsInvalidCharacter(value)
-						|| value.contains("_")) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The requested yell color can only contain numeric and regular characters.");
-				} else {
-					player.setYellColor(value);
-					player.getDialogueManager().startDialogue(
-							"SimpleMessage",
-							"Your yell color has been changed to <col="
-									+ player.getYellColor() + ">"
-									+ player.getYellColor() + "</col>.");
-				}
-				player.getTemporaryAttributtes()
-						.put("yellcolor", Boolean.FALSE);
-			} else if (player.getTemporaryAttributtes().get("yellshade") == Boolean.TRUE) {
-				if (value.length() != 6) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The HEX yell shade you wanted to pick cannot be longer and shorter then 6.");
-				} else if (Utilities.containsInvalidCharacter(value)
-						|| value.contains("_")) {
-					player.getDialogueManager()
-							.startDialogue("SimpleMessage",
-									"The requested yell shade can only contain numeric and regular characters.");
-				} else {
-					player.setYellShade(value);
-					player.getDialogueManager().startDialogue(
-							"SimpleMessage",
-							"Your yell color has been changed to <col="
-									+ player.getShadColor() + ">"
-									+ player.getShadColor() + "</col>.");
-				}
-				player.getTemporaryAttributtes()
-						.put("yellshade", Boolean.FALSE);
-			} else if (player.getTemporaryAttributtes().get("yellprefix") == Boolean.TRUE) {
-				String[] invalid = { "<euro", "<img", "<img=", "<col", "<col=",
-						"<shad", "<shad=", "<str>", "<u>", "owner", "0wner",
-						"mod", "admin" };
-				for (String s : invalid)
-					if (value.contains(s)) {
-						player.getPackets()
-								.sendGameMessage(
-										"You cannot add additional code to the message.");
-						return;
-					}
-				if (value.contains("reset"))
-					player.setPrefix("");
-				if (value.length() > 17) {
-					player.getDialogueManager().startDialogue("SimpleMessage",
-							"The title cannot be more than 16 characters.");
-				} else {
-					player.setPrefix(value);
-					player.getDialogueManager().startDialogue(
-							"SimpleMessage",
-							"Your yell title has been changed to "
-									+ player.getPrefix() + ".");
-				}
-				player.getTemporaryAttributtes().put("yellprefix",
-						Boolean.FALSE);
-			} else if (player.getTemporaryAttributtes().remove("setdisplay") != null) {
+			else if (player.getTemporaryAttributtes().remove("setdisplay") != null) {
 				if (Utilities.invalidAccountName(Utilities
 						.formatPlayerNameForProtocol(value))) {
 					player.getPackets().sendGameMessage("Invalid name!");
@@ -1735,23 +1626,6 @@ public final class WorldPacketsDecoder extends Decoder {
 									.getBabyNpcId()) {
 						player.getPet().setName(value);
 					}
-				}
-			} else if (player.getTemporaryAttributtes().remove("yellcolor") == Boolean.TRUE) {
-				if (value.length() != 6) {
-					player.getPackets()
-							.sendGameMessage(
-									"The HEX yell color you wanted to pick cannot be longer and shorter then 6.");
-				} else if (Utilities.containsInvalidCharacter(value)
-						|| value.contains("_")) {
-					player.getPackets()
-							.sendGameMessage(
-									"The requested yell color can only contain numeric and regular characters.");
-				} else {
-					player.setYellColor(value);
-					player.getPackets().sendGameMessage(
-							"Your yell color has been changed to <col="
-									+ player.getYellColor() + ">"
-									+ player.getYellColor() + "</col>.");
 				}
 			} else if (player.getTemporaryAttributtes().remove("setdisplay") == Boolean.TRUE) {
 				if (Utilities.invalidAccountName(Utilities

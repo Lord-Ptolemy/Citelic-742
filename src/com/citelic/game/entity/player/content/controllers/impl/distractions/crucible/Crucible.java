@@ -47,20 +47,20 @@ public class Crucible {
 	}
 
 	public static boolean addTarget(Player player, Player target,
-			CrucibleController playerControler) {
-		CrucibleController targetControler = getControler(target);
-		if (targetControler == null)
+			CrucibleController playerController) {
+		CrucibleController targetController = getController(target);
+		if (targetController == null)
 			return false;
 		if (!playersInside.remove(target))
 			return false;
-		playerControler.setTarget(target);
-		targetControler.setTarget(player);
+		playerController.setTarget(target);
+		targetController.setTarget(player);
 		return true;
 	}
 
 	public static void enterArena(Player player) {
 		travel(player, getBankTile());
-		player.getControllerManager().startController("CrucibleControler");
+		player.getControllerManager().startController("CrucibleController");
 	}
 
 	public static void enterCrucibleEntrance(Player player) {
@@ -83,7 +83,7 @@ public class Crucible {
 		return BANK_FISSURES[Utilities.random(BANK_FISSURES.length)].tile;
 	}
 
-	public static CrucibleController getControler(Player player) {
+	public static CrucibleController getController(Player player) {
 		Controller controler = player.getControllerManager().getController();
 		return (CrucibleController) (controler instanceof CrucibleController ? controler
 				: null);
@@ -174,7 +174,7 @@ public class Crucible {
 				crucibleControler.setInside(false);
 			}
 			if (crucibleControler.getTarget() != null) {
-				CrucibleController targetControler = getControler(crucibleControler
+				CrucibleController targetControler = getController(crucibleControler
 						.getTarget());
 				if (targetControler != null) {
 					targetControler.setTarget(null);

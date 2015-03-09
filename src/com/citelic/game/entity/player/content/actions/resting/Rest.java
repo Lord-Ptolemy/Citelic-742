@@ -8,11 +8,7 @@ import com.citelic.utility.Utilities;
 public class Rest extends Action {
 
 	private static int[][] REST_DEFS = { { 5713, 1549, 5748 },
-			{ 11786, 1550, 11788 }, { 5713, 1551, 2921 }
-
-	};
-
-	private static int[][] ZEN_DEFS = { { 17301, 17302, 17303 } };
+			{ 11786, 1550, 11788 }, { 5713, 1551, 2921 } };
 
 	private int index;
 
@@ -45,19 +41,10 @@ public class Rest extends Action {
 	public boolean start(Player player) {
 		if (!process(player))
 			return false;
-		if (player.isUsingZenRest()) {
-			index = Utilities.random(ZEN_DEFS.length);
-		} else {
-			index = Utilities.random(REST_DEFS.length);
-		}
+		index = Utilities.random(REST_DEFS.length);
 		player.setResting(true);
-		if (player.isUsingZenRest()) {
-			player.setNextAnimation(new Animation(ZEN_DEFS[index][0]));
-			player.getPlayerAppearance().setRenderEmote(ZEN_DEFS[index][1]);
-		} else {
-			player.setNextAnimation(new Animation(REST_DEFS[index][0]));
-			player.getPlayerAppearance().setRenderEmote(REST_DEFS[index][1]);
-		}
+		player.setNextAnimation(new Animation(REST_DEFS[index][0]));
+		player.getPlayerAppearance().setRenderEmote(REST_DEFS[index][1]);
 		return true;
 	}
 
@@ -66,10 +53,6 @@ public class Rest extends Action {
 		player.setResting(false);
 		player.getPlayerAppearance().setRenderEmote(-1);
 		player.getEmotesManager().setNextEmoteEnd();
-		if (player.isUsingZenRest()) {
-			player.setNextAnimation(new Animation(ZEN_DEFS[index][2]));
-		} else {
-			player.setNextAnimation(new Animation(REST_DEFS[index][2]));
-		}
+		player.setNextAnimation(new Animation(REST_DEFS[index][2]));
 	}
 }

@@ -8,7 +8,7 @@ import com.citelic.game.entity.player.Player;
 import com.citelic.game.entity.player.content.actions.Action;
 import com.citelic.game.entity.player.content.actions.skills.Skills;
 import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelArena;
-import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelControler;
+import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelController;
 import com.citelic.game.entity.player.item.FloorItem;
 import com.citelic.game.entity.player.item.Item;
 import com.citelic.game.map.objects.GameObject;
@@ -125,7 +125,7 @@ public class Firemaking extends Action {
 		}
 		if (!Engine.canMoveNPC(player.getZ(), player.getX(), player.getY(), 1) // cliped
 				|| player.getControllerManager().getController() instanceof DuelArena
-				|| player.getControllerManager().getController() instanceof DuelControler) { // contains
+				|| player.getControllerManager().getController() instanceof DuelController) { // contains
 			// object
 			player.getPackets().sendGameMessage("You can't light a fire here.");
 			return false;

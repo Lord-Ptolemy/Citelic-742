@@ -40,7 +40,7 @@ public final class GameConstants {
 
 	public static final int START_PLAYER_HITPOINTS = 100;
 	public static final Tile START_PLAYER_LOCATION = new Tile(2892, 3526, 0);
-	public static final String START_CONTROLER = "null";
+	public static final String START_CONTROLLER = "null";
 
 	public static final Tile RESPAWN_PLAYER_LOCATION = new Tile(2892, 3526, 0);
 

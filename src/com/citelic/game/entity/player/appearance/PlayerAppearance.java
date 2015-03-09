@@ -70,16 +70,7 @@ public class PlayerAppearance implements Serializable {
 			flag |= title >= 32 && title <= 37 ? 0x80 : 0x40; // after/before
 		stream.writeByte(flag);
 		if (title != 0) {
-			String titleName = title == 666 ? "<col=C12006>Phantom </col>"
-					: title == 12345 ? "<shad=000000><col="
-							+ player.getTitleColor() + ">" + player.getTitle()
-							+ " </col></shad>"
-							: title == 12345 ? "<col=C12006>"
-									+ player.getCustomTitle() + " </col>"
-									: title == 25 ? "<col=c12006>Yt'Haar </col>"
-											: ClientScriptMap.getMap(
-													male ? 1093 : 3872)
-													.getStringValue(title);
+			String titleName = ClientScriptMap.getMap(male ? 1093 : 3872).getStringValue(title);
 			stream.writeGJString(titleName);
 		}
 		stream.writeByte(player.hasSkull() ? player.getSkullId() : -1); // pk//

@@ -18,7 +18,7 @@ public class SafetyGuard extends Dialogue {
 	@Override
 	public void start() {
 		npcId = (Integer) parameters[0];
-		if (player.playerSafety0 == false) {
+		if (player.playerSafety[0] == false) {
 			sendNPCDialogue(npcId, 9803, "Can I help you?");
 		} else {
 			sendNPCDialogue(
@@ -33,7 +33,7 @@ public class SafetyGuard extends Dialogue {
 	public void run(int interfaceId, int componentId) {
 		switch (stage) {
 		case -1:
-			if (player.playerSafety0 == false) {
+			if (player.playerSafety[0] == false) {
 				stage = 3;
 				sendPlayerDialogue(9803, "I hope so. What is this place?");
 			} else {
@@ -53,7 +53,7 @@ public class SafetyGuard extends Dialogue {
 			break;
 		case 4:
 			stage = 5;
-			player.playerSafety0 = true;
+			player.playerSafety[0] = true;
 			player.sendByFiles();
 			sendNPCDialogue(npcId, 9836,
 					"They say that hidden away somewhere here is the",

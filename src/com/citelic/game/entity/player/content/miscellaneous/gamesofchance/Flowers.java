@@ -5,7 +5,7 @@ import com.citelic.game.engine.task.EngineTask;
 import com.citelic.game.engine.task.EngineTaskManager;
 import com.citelic.game.entity.player.Player;
 import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelArena;
-import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelControler;
+import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelController;
 import com.citelic.game.map.objects.GameObject;
 import com.citelic.game.map.tile.Tile;
 import com.citelic.utility.Utilities;
@@ -23,7 +23,7 @@ public class Flowers {
 				|| Engine.getRegion(player.getRegionId()).getSpawnedObject(
 						player) != null
 				|| player.getControllerManager().getController() instanceof DuelArena
-				|| player.getControllerManager().getController() instanceof DuelControler) {
+				|| player.getControllerManager().getController() instanceof DuelController) {
 			player.getPackets()
 					.sendGameMessage("You can't plant flowers here.");
 			return false;

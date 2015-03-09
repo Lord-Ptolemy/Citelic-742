@@ -607,12 +607,12 @@ public final class Engine {
 		return true;
 	}
 
-	private static void checkControlersAtMove(Player player) {
+	private static void checkControllersAtMove(Player player) {
 		if (!(player.getControllerManager().getController() instanceof RequestController)
 				&& RequestController.inWarRequest(player))
 			player.getControllerManager().startController("clan_wars_request");
 		else if (player.getRegionId() == 13363)
-			player.getControllerManager().startController("DuelControler");
+			player.getControllerManager().startController("DuelController");
 		else if (player.getRegionId() == 13626 || player.getRegionId() == 13625)
 			player.getControllerManager().startController("DungeoneeringLobby");
 		else if (FfaZone.inArea(player))
@@ -2010,7 +2010,7 @@ public final class Engine {
 					player.getMusicsManager().checkMusic(musicId);
 				player.getControllerManager().moved();
 				if (player.isActive())
-					checkControlersAtMove(player);
+					checkControllersAtMove(player);
 			} else {
 				if (entity.getLastRegionId() > 0)
 					getRegion(entity.getLastRegionId()).removeNPCIndex(
@@ -2024,7 +2024,7 @@ public final class Engine {
 				Player player = (Player) entity;
 				player.getControllerManager().moved();
 				if (player.isActive())
-					checkControlersAtMove(player);
+					checkControllersAtMove(player);
 			}
 			entity.checkMultiArea();
 		}

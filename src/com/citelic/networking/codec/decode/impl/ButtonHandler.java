@@ -36,7 +36,7 @@ import com.citelic.game.entity.player.content.controllers.impl.ImpossibleJad;
 import com.citelic.game.entity.player.content.controllers.impl.distractions.crucible.Crucible;
 import com.citelic.game.entity.player.content.controllers.impl.distractions.pestcontrol.CommendationExchange;
 import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.Wilderness;
-import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelControler;
+import com.citelic.game.entity.player.content.controllers.impl.distractions.pvp.duelarena.DuelController;
 import com.citelic.game.entity.player.content.dialogue.SkillsDialogue;
 import com.citelic.game.entity.player.content.dialogue.impl.misc.LevelUp;
 import com.citelic.game.entity.player.content.miscellaneous.AdventurersLog;
@@ -178,7 +178,7 @@ public class ButtonHandler {
 				player.getTemporaryAttributtes().put("WillDuelFriendly", false);
 				player.getPackets().sendConfig(283, 134217728);
 			} else if (componentId == 20) {
-				DuelControler.challenge(player);
+				DuelController.challenge(player);
 			}
 			break;
 		case 548:
@@ -1266,7 +1266,7 @@ public class ButtonHandler {
 				player.stopAll();
 				player.setNextTile(new Tile(2974, 4384, player.getZ()));
 				player.getControllerManager().startController(
-						"CorpBeastControler");
+						"CorpBeastController");
 			} else if (componentId == 16)
 				player.closeInterfaces();
 			break;
