@@ -25,11 +25,7 @@ public class LoyaltyManager {
 						// alot players :)
 					}
 					if (countDown == 1) {
-						if (player.isVipRank()) {
-							player.setLoyaltyPoints(player.getLoyaltyPoints() + 1);
-						} else {
-							player.setLoyaltyPoints(player.getLoyaltyPoints() + 1);
-						}
+						player.setLoyaltyPoints(player.getLoyaltyPoints() + 1);
 						countDown = 1800;
 					}
 					if (countDown > 0) {

@@ -81,23 +81,17 @@ public final class Skills implements Serializable {
 				|| skill == DUNGEONEERING || skill == MAGIC || skill == RANGE
 				|| skill == DEFENCE || skill == STRENGTH)
 			return Wilderness.isAtWild(player) ? 1.0
-					: player.isVipRank() ? GameConstants.COMBAT_XP_RATE * 1.3
-							: GameConstants.COMBAT_XP_RATE;
+					: GameConstants.COMBAT_XP_RATE;
 		// Skilling Skills (Special rates)
 		if (skill == FISHING)
-			return player.isVipRank() ? GameConstants.FISHING_XP_RATE * 1.3
-					: GameConstants.FISHING_XP_RATE;
+			return GameConstants.FISHING_XP_RATE;
 		if (skill == CRAFTING)
-			return player.isVipRank() ? GameConstants.CRAFTING_XP_RATE * 1.3
-					: GameConstants.CRAFTING_XP_RATE;
+			return GameConstants.CRAFTING_XP_RATE;
 		if (skill == SUMMONING)
-			return player.isVipRank() ? GameConstants.SUMMONING_XP_RATE * 1.3
-					: GameConstants.SUMMONING_XP_RATE;
+			return GameConstants.SUMMONING_XP_RATE;
 		if (skill == RUNECRAFTING)
-			return player.isVipRank() ? GameConstants.RUNECRAFTING_XP_RATE * 1.3
-					: GameConstants.RUNECRAFTING_XP_RATE;
-		return player.isVipRank() ? GameConstants.SKILLING_XP_RATE * 1.3
-				: GameConstants.SKILLING_XP_RATE;
+			return GameConstants.RUNECRAFTING_XP_RATE;
+		return GameConstants.SKILLING_XP_RATE;
 	}
 
 	public void addXp(int skill, double exp) {

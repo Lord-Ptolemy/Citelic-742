@@ -118,7 +118,6 @@ import com.citelic.networking.codec.encode.WorldPacketsEncoder;
 import com.citelic.utility.Logger;
 import com.citelic.utility.LoggingSystem;
 import com.citelic.utility.MachineInformation;
-import com.citelic.utility.PkRank;
 import com.citelic.utility.SerializableFilesManager;
 import com.citelic.utility.Utilities;
 import com.citelic.utility.cryptology.IsaacKeyPair;
@@ -151,6 +150,8 @@ public class Player extends Entity {
 	private int questPoints;
 	private boolean allowChatEffects;
 	public boolean hideServerMessages;
+	public transient String username;
+	private boolean usingJAG;
 	
 	/*
 	 * Player Donator Constants
@@ -191,7 +192,6 @@ public class Player extends Entity {
 	 */
 	private final Bank bank;
 	private BankPin pin;
-	
 	private final int[] bankpins = new int[] { 0, 0, 0, 0 };
 	private final int[] confirmpin = new int[] { 0, 0, 0, 0 };
 	private final int[] changeBankPin = new int[] { 0, 0, 0, 0 };
@@ -219,8 +219,8 @@ public class Player extends Entity {
 	/*
 	 * Lodestones
 	 */
+	public Tile lodeStoneTile = null;
 	private LodeStones lodeStone;
-	
 	private boolean[] activatedLodestones;
 	
 	/*
@@ -350,7 +350,6 @@ public class Player extends Entity {
 	private transient boolean largeSceneView;
 	private int lastBonfire;
 	public transient DuelRules lastDuelRules;
-	private String lastKilled;
 
 	private String lastMsg;
 	private transient long lastPublicMessage;
@@ -360,8 +359,6 @@ public class Player extends Entity {
 	private int loadedLogs;
 
 	private transient long lockDelay;
-	
-	public Tile lodeStoneTile = null;
 	
 	public Tile getLodeStoneTile() {
 		return lodeStoneTile;
@@ -459,14 +456,12 @@ public class Player extends Entity {
 
 	private boolean talkedtoCook;
 
-	// crucible
 	private boolean talkedWithMarv;
 
 	private int temporaryMovementType;
 
 	private long thievingDelay;
 
-	// Lootshare
 	private transient boolean toggleLootShare;
 
 	public Toolbelt toolbelt;
@@ -480,20 +475,9 @@ public class Player extends Entity {
 	private boolean updateMovementType;
 
 
-	// transient stuff
-	public transient String username;
-
-	private boolean usingJAG;
-
-
 	private int vecnaTimer;
 
-	// shop
 	private boolean verboseShopDisplayMode;
-
-	private boolean veteran;
-
-	private boolean vipRank;
 
 	private int votePoints;
 
@@ -515,7 +499,6 @@ public class Player extends Entity {
 
 	private int zeals;
 
-	// creates Player and saved classes
 	public Player(String password, String mac) {
 		super(GameConstants.START_PLAYER_LOCATION);
 		setHitpoints(GameConstants.START_PLAYER_HITPOINTS);
@@ -601,11 +584,6 @@ public class Player extends Entity {
 		potDelay = time + Utilities.currentTimeMillis();
 	}
 
-	/**
-	 * Adds points
-	 *
-	 * @param points
-	 */
 	public void addRunespanPoints(int points) {
 		runeSpanPoints += points;
 	}
@@ -1141,9 +1119,8 @@ public class Player extends Entity {
 	public int getMessageIcon() {
 		return getRights() == 2 || getRights() == 1 ? getRights()
 				: isForumModerator() ? 10 : isSupporter() ? 4
-						: isVeteran() ? 11 : isVipRank() ? 10
-								: isExtremeDonator() ? 9 : isDonator() ? 8
-										: getRights();
+						: isExtremeDonator() ? 9 : isDonator() ? 8
+								: getRights();
 	}
 
 	public MoneyPouch getMoneyPouch() {
@@ -2050,32 +2027,6 @@ public class Player extends Entity {
 		crucibleHighScore++;
 	}
 
-	public void increaseKillCount(Player killed) {
-		if (lastKilled == killed.getUsername()) {
-			sendMessage("You haven't been awarded any pk points for killing; "
-					+ killed.getDisplayName() + " twice.");
-			return;
-		}
-		if (killed.getCurrentMac().equalsIgnoreCase(getCurrentMac())) {
-			Logger.log("Killer: " + getUsername() + " killed "
-					+ killed.getUsername() + " on same computer.");
-			return;
-		}
-		killed.deathCount++;
-		PkRank.checkRank(killed);
-		lastKilled = killed.getUsername();
-		if (killed.getSession().getIP().equals(getSession().getIP())) {
-			return;
-		}
-		final int points = isVipRank() ? 15 : Wilderness.isAtWild(this) ? 10
-				: getPkPoints() + 3;
-		killCount++;
-		sendMessage("<shad=000000><col=ff0000>You have been awarded " + points
-				+ " pk point for killing; " + killed.getDisplayName() + ".");
-		setPkPoints(points);
-		PkRank.checkRank(this);
-	}
-
 	public void increaseZeals(int zeals) {
 		this.zeals += zeals;
 	}
@@ -2429,14 +2380,6 @@ public class Player extends Entity {
 
 	public boolean isUsingReportOption() {
 		return reportOption;
-	}
-
-	public boolean isVeteran() {
-		return veteran;
-	}
-
-	public boolean isVipRank() {
-		return vipRank;
 	}
 
 	public boolean isWonFightPits() {
@@ -4240,15 +4183,6 @@ public class Player extends Entity {
 	public void setVerboseShopDisplayMode(boolean b) {
 		getPackets().sendConfigByFile(11055, verboseShopDisplayMode ? 0 : 1);
 	}
-
-	public void setVeteran(boolean veteran) {
-		this.veteran = veteran;
-	}
-
-	public void setVipRank(boolean vipRank) {
-		this.vipRank = vipRank;
-	}
-
 	public void setVotePoints(int votePoints) {
 		this.votePoints = votePoints;
 	}

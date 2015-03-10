@@ -26,17 +26,20 @@ public final class GrabPacketsDecoder extends Decoder {
 	}
 
 	private final void decodeOtherPacket(InputStream stream, int packetId) {
-		if (packetId == 7) {
+		switch (packetId) {
+		case 7:
 			session.getChannel().close();
-			return;
-		}
-		if (packetId == 4) {
+			break;
+		case 4:
 			session.getGrabPackets().setEncryptionValue(
 					stream.readUnsignedByte());
 			if (stream.readUnsignedShort() != 0)
 				session.getChannel().close();
-		} else
+			break;
+		default:
 			stream.skip(5);
+			break;
+		}
 	}
 
 	private final void decodeRequestCacheContainer(InputStream stream,

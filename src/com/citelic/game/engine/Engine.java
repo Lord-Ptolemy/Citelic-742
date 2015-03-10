@@ -372,26 +372,6 @@ public final class Engine {
 		}
 	}
 
-	private static void addLoyaltyTask() {
-		CoresManager.slowExecutor.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				for (Player player : getPlayers()) {
-					if (player == null) {
-						continue;
-					}
-					if (player.checkTotalLevel(500) > 500) {
-						if (player.isVipRank()) {
-							player.setLoyaltyPoints(player.getLoyaltyPoints() + 2);
-						} else {
-							player.setLoyaltyPoints(player.getLoyaltyPoints() + 1);
-						}
-					}
-				}
-			}
-		}, 0, 1, TimeUnit.HOURS);
-	}
-
 	public static final void addNPC(NPC npc) {
 		npcs.add(npc);
 	}
@@ -1149,7 +1129,6 @@ public final class Engine {
 		addOwnedObjectsTask();
 		LivingRockCavern.init();
 		addRestoreShopItemsTask();
-		addLoyaltyTask();
 		growPatchesTask();
 		addAutoRestock();
 		WarriorsGuild.init();

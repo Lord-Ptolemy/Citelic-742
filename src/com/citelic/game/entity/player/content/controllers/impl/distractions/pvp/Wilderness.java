@@ -293,7 +293,6 @@ public class Wilderness extends Controller {
 							.getMostDamageReceivedSourcePlayer();
 					if (killer != null) {
 						killer.removeDamage(Wilderness.this.player);
-						killer.increaseKillCount(Wilderness.this.player);
 					}
 					Wilderness.this.player.sendItemsOnDeath(killer);
 					Wilderness.this.player.getEquipment().init();

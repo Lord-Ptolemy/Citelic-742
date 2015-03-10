@@ -306,10 +306,19 @@ public final class WorldPacketsDecoder extends Decoder {
 		loadPacketSizes();
 	}
 
+	/**
+	 * 
+	 * @param player
+	 * @param packet
+	 * 
+	 * All out-commented opcodes we're duplicated {@code -1}, get the real opcode and make them functional again.
+	 */
 	public static void decodeLogicPacket(final Player player, LogicPacket packet) {
 		int packetId = packet.getId();
 		InputStream stream = new InputStream(packet.getData());
-		if (packetId == WALKING_PACKET || packetId == MINI_WALKING_PACKET) {
+		switch (packetId) {
+		case WALKING_PACKET:
+		case MINI_WALKING_PACKET: {
 			if (!player.isActive() || !player.clientHasLoadedMapRegion()
 					|| player.isDead() || player.isLocked())
 				return;
@@ -325,7 +334,6 @@ public final class WorldPacketsDecoder extends Decoder {
 				player.setRun(forceRun);
 
 			player.stopAll();
-
 			int steps = RouteFinder.findRoute(RouteFinder.WALK_ROUTEFINDER,
 					player.getX(), player.getY(), player.getZ(),
 					player.getSize(), new FixedTileStrategy(bx, by), true);
@@ -351,17 +359,24 @@ public final class WorldPacketsDecoder extends Decoder {
 						tile.getLocalX(player.getLastLoadedMapRegionTile()),
 						tile.getLocalY(player.getLastLoadedMapRegionTile()));
 			}
-		} else if (packetId == OBJECT_CLICK1_PACKET) {
+			break;
+		}
+		case OBJECT_CLICK1_PACKET:
 			ObjectHandler.handleOption(player, stream, 1);
-		} else if (packetId == OBJECT_CLICK2_PACKET) {
+			break;
+		case OBJECT_CLICK2_PACKET:
 			ObjectHandler.handleOption(player, stream, 2);
-		} else if (packetId == OBJECT_CLICK3_PACKET) {
+			break;
+		/*case OBJECT_CLICK3_PACKET:
 			ObjectHandler.handleOption(player, stream, 3);
-		} else if (packetId == OBJECT_CLICK4_PACKET) {
+			break;
+		case OBJECT_CLICK4_PACKET:
 			ObjectHandler.handleOption(player, stream, 4);
-		} else if (packetId == OBJECT_CLICK5_PACKET) {
+			break;*/
+		case OBJECT_CLICK5_PACKET:
 			ObjectHandler.handleOption(player, stream, 5);
-		} else if (packetId == INTERFACE_ON_PLAYER) {
+			break;
+		case INTERFACE_ON_PLAYER: {
 			if (!player.isActive() || !player.clientHasLoadedMapRegion()
 					|| player.isDead())
 				return;
@@ -666,7 +681,9 @@ public final class WorldPacketsDecoder extends Decoder {
 			}
 			if (GameConstants.DEBUG)
 				System.out.println("Spell:" + componentId);
-		} else if (packetId == WorldPacketsDecoder.WORLD_MAP_CLICK) {
+			break;
+		}
+		case WORLD_MAP_CLICK: {
 			int coordinateHash = stream.readInt();
 			int x = coordinateHash >> 14;
 			int y = coordinateHash & 0x3fff;
@@ -682,540 +699,563 @@ public final class WorldPacketsDecoder extends Decoder {
 						-1, true);
 				player.getPackets().sendConfig(1159, coordinateHash);
 			}
-		} else if (packetId == INTERFACE_ON_NPC) {
-			if (!player.isActive() || !player.clientHasLoadedMapRegion()
-					|| player.isDead())
-				return;
-			if (player.getLockDelay() > Utilities.currentTimeMillis())
-				return;
-			int npcIndex = stream.readShort128();
-			int itemId = stream.readShort128();
-			int interfaceSlot = stream.readShort();
-			boolean ctrlRun = stream.readByte128() == 1;
-			int interfaceHash = stream.readInt();
-			int interfaceId = interfaceHash >> 16;
-			int componentId = interfaceHash - (interfaceId << 16);
-			if (Utilities.getInterfaceDefinitionsSize() <= interfaceId)
-				return;
-			if (!player.getInterfaceManager().containsInterface(interfaceId))
-				return;
-			if (componentId == 65535)
-				componentId = -1;
-			if (componentId != -1
-					&& Utilities
-							.getInterfaceDefinitionsComponentsSize(interfaceId) <= componentId)
-				return;
-			NPC npc = Engine.getNPCs().get(npcIndex);
-			if (npc == null || npc.isDead() || npc.hasFinished()
-					|| !player.getMapRegionsIds().contains(npc.getRegionId()))
-				return;
-			player.stopAll(false);
-			if (interfaceId != Inventory.INVENTORY_INTERFACE) {
-				if (!npc.getDefinitions().hasAttackOption()) {
-					player.getPackets().sendGameMessage(
-							"You can't attack this npc.");
+			break;
+		}
+			case INTERFACE_ON_NPC: {
+				if (!player.isActive() || !player.clientHasLoadedMapRegion()
+						|| player.isDead())
 					return;
+				if (player.getLockDelay() > Utilities.currentTimeMillis())
+					return;
+				int npcIndex = stream.readShort128();
+				int itemId = stream.readShort128();
+				int interfaceSlot = stream.readShort();
+				boolean ctrlRun = stream.readByte128() == 1;
+				int interfaceHash = stream.readInt();
+				int interfaceId = interfaceHash >> 16;
+				int componentId = interfaceHash - (interfaceId << 16);
+				if (Utilities.getInterfaceDefinitionsSize() <= interfaceId)
+					return;
+				if (!player.getInterfaceManager().containsInterface(interfaceId))
+					return;
+				if (componentId == 65535)
+					componentId = -1;
+				if (componentId != -1
+						&& Utilities
+								.getInterfaceDefinitionsComponentsSize(interfaceId) <= componentId)
+					return;
+				NPC npc = Engine.getNPCs().get(npcIndex);
+				if (npc == null || npc.isDead() || npc.hasFinished()
+						|| !player.getMapRegionsIds().contains(npc.getRegionId()))
+					return;
+				player.stopAll(false);
+				if (interfaceId != Inventory.INVENTORY_INTERFACE) {
+					if (!npc.getDefinitions().hasAttackOption()) {
+						player.getPackets().sendGameMessage(
+								"You can't attack this npc.");
+						return;
+					}
 				}
-			}
-			switch (interfaceId) {
-			case Inventory.INVENTORY_INTERFACE:
-				Item item = player.getInventory().getItem(interfaceSlot);
-				if (item == null
-						|| !player.getControllerManager().processItemOnNPC(npc,
-								item))
-					return;
-				InventoryOptionsHandler.handleItemOnNPC(player, npc, item);
-				break;
-			case 1165:
-				Summoning.attackDreadnipTarget(npc, player);
-				break;
-			case 662:
-			case 747:
-				if (player.getFamiliar() == null)
-					return;
-				if (npc.getId() == 14301) {
-					Glacor glacor = (Glacor) npc;
-					if (glacor != null) {
-						if (glacor.getTarget() == null) {
-							if (player.getAttackedByDelay() > Utilities
-									.currentTimeMillis()) {
+				switch (interfaceId) {
+				case Inventory.INVENTORY_INTERFACE:
+					Item item = player.getInventory().getItem(interfaceSlot);
+					if (item == null
+							|| !player.getControllerManager().processItemOnNPC(npc,
+									item))
+						return;
+					InventoryOptionsHandler.handleItemOnNPC(player, npc, item);
+					break;
+				case 1165:
+					Summoning.attackDreadnipTarget(npc, player);
+					break;
+				case 662:
+				case 747:
+					if (player.getFamiliar() == null)
+						return;
+					if (npc.getId() == 14301) {
+						Glacor glacor = (Glacor) npc;
+						if (glacor != null) {
+							if (glacor.getTarget() == null) {
+								if (player.getAttackedByDelay() > Utilities
+										.currentTimeMillis()) {
+									return;
+								} else {
+									glacor.setTarget(player);
+									player.setAttackedByDelay(10000);
+									return;
+								}
+							}
+							if (!glacor.attackable(player)) {
 								return;
-							} else {
-								glacor.setTarget(player);
-								player.setAttackedByDelay(10000);
+							}
+
+							player.setAttackedByDelay(10000);
+						}
+					}
+					if (npc.getId() == 14302) {
+						UnstableGlacyte unstable = (UnstableGlacyte) npc;
+						if (unstable != null) {
+							if (unstable.getTarget() == null)
+								unstable.setTarget(player);
+							if (!unstable.attackable(player)) {
 								return;
 							}
 						}
-						if (!glacor.attackable(player)) {
-							return;
-						}
-
-						player.setAttackedByDelay(10000);
 					}
-				}
-				if (npc.getId() == 14302) {
-					UnstableGlacyte unstable = (UnstableGlacyte) npc;
-					if (unstable != null) {
-						if (unstable.getTarget() == null)
-							unstable.setTarget(player);
-						if (!unstable.attackable(player)) {
-							return;
+					if (npc.getId() == 14303) {
+						SappingGlacyte sapping = (SappingGlacyte) npc;
+						if (sapping != null) {
+							if (sapping.getTarget() == null)
+								sapping.setTarget(player);
+							if (!sapping.attackable(player)) {
+								return;
+							}
 						}
 					}
-				}
-				if (npc.getId() == 14303) {
-					SappingGlacyte sapping = (SappingGlacyte) npc;
-					if (sapping != null) {
-						if (sapping.getTarget() == null)
-							sapping.setTarget(player);
-						if (!sapping.attackable(player)) {
-							return;
+					if (npc.getId() == 14304) {
+						EnduringGlacyte enduring = (EnduringGlacyte) npc;
+						if (enduring != null) {
+							if (enduring.getTarget() == null)
+								enduring.setTarget(player);
+							if (!enduring.attackable(player)) {
+								return;
+							}
 						}
 					}
-				}
-				if (npc.getId() == 14304) {
-					EnduringGlacyte enduring = (EnduringGlacyte) npc;
-					if (enduring != null) {
-						if (enduring.getTarget() == null)
-							enduring.setTarget(player);
-						if (!enduring.attackable(player)) {
-							return;
+					player.resetWalkSteps();
+					if ((interfaceId == 747 && componentId == 15)
+							|| (interfaceId == 662 && componentId == 65)
+							|| (interfaceId == 662 && componentId == 74)
+							|| interfaceId == 747 && componentId == 18
+							|| interfaceId == 747 && componentId == 24) {
+						if ((interfaceId == 662 && componentId == 74 || interfaceId == 747
+								&& componentId == 18)) {
+							if (player.getFamiliar().getSpecialAttack() != SpecialAttack.ENTITY)
+								return;
 						}
-					}
-				}
-				player.resetWalkSteps();
-				if ((interfaceId == 747 && componentId == 15)
-						|| (interfaceId == 662 && componentId == 65)
-						|| (interfaceId == 662 && componentId == 74)
-						|| interfaceId == 747 && componentId == 18
-						|| interfaceId == 747 && componentId == 24) {
-					if ((interfaceId == 662 && componentId == 74 || interfaceId == 747
-							&& componentId == 18)) {
-						if (player.getFamiliar().getSpecialAttack() != SpecialAttack.ENTITY)
-							return;
-					}
-					if (npc instanceof Familiar) {
-						Familiar familiar = (Familiar) npc;
-						if (familiar == player.getFamiliar()) {
-							player.getPackets().sendGameMessage(
-									"You can't attack your own familiar.");
-							return;
+						if (npc instanceof Familiar) {
+							Familiar familiar = (Familiar) npc;
+							if (familiar == player.getFamiliar()) {
+								player.getPackets().sendGameMessage(
+										"You can't attack your own familiar.");
+								return;
+							}
+							if (!player.getFamiliar()
+									.canAttack(familiar.getOwner())) {
+								player.getPackets()
+										.sendGameMessage(
+												"You can only attack players in a player-vs-player area.");
+								return;
+							}
 						}
-						if (!player.getFamiliar()
-								.canAttack(familiar.getOwner())) {
+						if (!player.getFamiliar().canAttack(npc)) {
 							player.getPackets()
 									.sendGameMessage(
-											"You can only attack players in a player-vs-player area.");
+											"You can only use your familiar in a multi-zone area.");
 							return;
+						} else {
+							player.getFamiliar().setSpecial(
+									interfaceId == 662 && componentId == 74
+											|| interfaceId == 747
+											&& componentId == 18);
+							player.getFamiliar().setTarget(npc);
 						}
 					}
-					if (!player.getFamiliar().canAttack(npc)) {
-						player.getPackets()
-								.sendGameMessage(
-										"You can only use your familiar in a multi-zone area.");
+					break;
+				case 193:
+					switch (componentId) {
+					case 28:
+					case 32:
+					case 24:
+					case 20:
+					case 30:
+					case 34:
+					case 26:
+					case 22:
+					case 29:
+					case 33:
+					case 25:
+					case 21:
+					case 31:
+					case 35:
+					case 27:
+					case 23:
+						if (Magic.checkCombatSpell(player, componentId, 1, false)) {
+							player.setNextFaceTile(new Tile(npc.getCoordFaceX(npc
+									.getSize()), npc.getCoordFaceY(npc.getSize()),
+									npc.getZ()));
+							if (!player.getControllerManager().canAttack(npc))
+								return;
+							if (npc instanceof Familiar) {
+								Familiar familiar = (Familiar) npc;
+								if (familiar == player.getFamiliar()) {
+									player.getPackets().sendGameMessage(
+											"You can't attack your own familiar.");
+									return;
+								}
+								if (!familiar.canAttack(player)) {
+									player.getPackets().sendGameMessage(
+											"You can't attack this npc.");
+									return;
+								}
+							} else if (!npc.isForceMultiAttacked()) {
+								if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
+									if (player.getAttackedBy() != npc
+											&& player.getAttackedByDelay() > Utilities
+													.currentTimeMillis()) {
+										player.getPackets().sendGameMessage(
+												"You are already in combat.");
+										return;
+									}
+									if (npc.getAttackedBy() != player
+											&& npc.getAttackedByDelay() > Utilities
+													.currentTimeMillis()) {
+										player.getPackets().sendGameMessage(
+												"This npc is already in combat.");
+										return;
+									}
+								}
+							}
+							player.getActionManager().setAction(
+									new PlayerCombat(npc));
+						}
+						break;
+					}
+				case 192:
+					switch (componentId) {
+					case 25: // air strike
+					case 28: // water strike
+					case 30: // earth strike
+					case 32: // fire strike
+					case 34: // air bolt
+					case 39: // water bolt
+					case 42: // earth bolt
+					case 45: // fire bolt
+					case 49: // air blast
+					case 52: // water blast
+					case 58: // earth blast
+					case 63: // fire blast
+					case 70: // air wave
+					case 73: // water wave
+					case 77: // earth wave
+					case 80: // fire wave
+					case 84: // air surge
+					case 87: // water surge
+					case 89: // earth surge
+					case 66: // Sara Strike
+					case 67: // Guthix Claws
+					case 68: // Flame of Zammy
+					case 93:
+					case 91: // fire surge
+					case 99: // storm of Armadyl
+					case 36: // bind
+					case 55: // snare
+					case 81: // entangle
+						if (Magic.checkCombatSpell(player, componentId, 1, false)) {
+							player.setNextFaceTile(new Tile(npc.getCoordFaceX(npc
+									.getSize()), npc.getCoordFaceY(npc.getSize()),
+									npc.getZ()));
+							if (!player.getControllerManager().canAttack(npc))
+								return;
+							if (npc instanceof Familiar) {
+								Familiar familiar = (Familiar) npc;
+								if (familiar == player.getFamiliar()) {
+									player.getPackets().sendGameMessage(
+											"You can't attack your own familiar.");
+									return;
+								}
+								if (!familiar.canAttack(player)) {
+									player.getPackets().sendGameMessage(
+											"You can't attack this npc.");
+									return;
+								}
+							} else if (!npc.isForceMultiAttacked()) {
+								if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
+									if (player.getAttackedBy() != npc
+											&& player.getAttackedByDelay() > Utilities
+													.currentTimeMillis()) {
+										player.getPackets().sendGameMessage(
+												"You are already in combat.");
+										return;
+									}
+									if (npc.getAttackedBy() != player
+											&& npc.getAttackedByDelay() > Utilities
+													.currentTimeMillis()) {
+										player.getPackets().sendGameMessage(
+												"This npc is already in combat.");
+										return;
+									}
+								}
+							}
+							player.getActionManager().setAction(
+									new PlayerCombat(npc));
+						}
+						break;
+					}
+					break;
+				}
+				if (GameConstants.DEBUG)
+					System.out.println("Spell:" + componentId);
+
+				break;
+			}
+			case ATTACK_NPC: {
+				if (!player.isActive() || !player.clientHasLoadedMapRegion()
+						|| player.isDead()
+						|| player.getLockDelay() > Utilities.currentTimeMillis()) {
+					return;
+				}
+				int entityIndex = stream.readShort(); // i see
+				boolean unknown = stream.readByte() == 1;
+				if (unknown)
+					player.setRun(unknown);
+				NPC npc = Engine.getNPCs().get(entityIndex);
+				if (npc == null || npc.isDead() || npc.hasFinished()
+						|| !player.getMapRegionsIds().contains(npc.getRegionId())
+						|| !npc.getDefinitions().hasAttackOption()) {
+					return;
+				}
+				if (!player.getControllerManager().canAttack(npc)) {
+					return;
+				}
+				if (npc instanceof Familiar) {
+					Familiar familiar = (Familiar) npc;
+					if (familiar == player.getFamiliar()) {
+						player.getPackets().sendGameMessage(
+								"You can't attack your own familiar.");
 						return;
-					} else {
-						player.getFamiliar().setSpecial(
-								interfaceId == 662 && componentId == 74
-										|| interfaceId == 747
-										&& componentId == 18);
-						player.getFamiliar().setTarget(npc);
+					}
+					if (!familiar.canAttack(player)) {
+						player.getPackets().sendGameMessage(
+								"You can't attack this npc.");
+						return;
+					}
+				} else if (!npc.isForceMultiAttacked()) {
+					if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
+						if (player.getAttackedBy() != npc
+								&& player.getAttackedByDelay() > Utilities
+										.currentTimeMillis()) {
+							player.getPackets().sendGameMessage(
+									"You are already in combat.");
+							return;
+						}
+						if (npc.getAttackedBy() != player
+								&& npc.getAttackedByDelay() > Utilities
+										.currentTimeMillis()) {
+							player.getPackets().sendGameMessage(
+									"This npc is already in combat.");
+							return;
+						}
 					}
 				}
+				player.stopAll(false);
+				player.getActionManager().setAction(new PlayerCombat(npc));
 				break;
-			case 193:
-				switch (componentId) {
-				case 28:
-				case 32:
-				case 24:
-				case 20:
-				case 30:
-				case 34:
-				case 26:
-				case 22:
-				case 29:
-				case 33:
-				case 25:
-				case 21:
-				case 31:
-				case 35:
-				case 27:
-				case 23:
-					if (Magic.checkCombatSpell(player, componentId, 1, false)) {
-						player.setNextFaceTile(new Tile(npc.getCoordFaceX(npc
-								.getSize()), npc.getCoordFaceY(npc.getSize()),
-								npc.getZ()));
-						if (!player.getControllerManager().canAttack(npc))
-							return;
-						if (npc instanceof Familiar) {
-							Familiar familiar = (Familiar) npc;
-							if (familiar == player.getFamiliar()) {
-								player.getPackets().sendGameMessage(
-										"You can't attack your own familiar.");
-								return;
-							}
-							if (!familiar.canAttack(player)) {
-								player.getPackets().sendGameMessage(
-										"You can't attack this npc.");
-								return;
-							}
-						} else if (!npc.isForceMultiAttacked()) {
-							if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
-								if (player.getAttackedBy() != npc
-										&& player.getAttackedByDelay() > Utilities
-												.currentTimeMillis()) {
-									player.getPackets().sendGameMessage(
-											"You are already in combat.");
-									return;
-								}
-								if (npc.getAttackedBy() != player
-										&& npc.getAttackedByDelay() > Utilities
-												.currentTimeMillis()) {
-									player.getPackets().sendGameMessage(
-											"This npc is already in combat.");
-									return;
-								}
-							}
-						}
-						player.getActionManager().setAction(
-								new PlayerCombat(npc));
-					}
-					break;
-				}
-			case 192:
-				switch (componentId) {
-				case 25: // air strike
-				case 28: // water strike
-				case 30: // earth strike
-				case 32: // fire strike
-				case 34: // air bolt
-				case 39: // water bolt
-				case 42: // earth bolt
-				case 45: // fire bolt
-				case 49: // air blast
-				case 52: // water blast
-				case 58: // earth blast
-				case 63: // fire blast
-				case 70: // air wave
-				case 73: // water wave
-				case 77: // earth wave
-				case 80: // fire wave
-				case 84: // air surge
-				case 87: // water surge
-				case 89: // earth surge
-				case 66: // Sara Strike
-				case 67: // Guthix Claws
-				case 68: // Flame of Zammy
-				case 93:
-				case 91: // fire surge
-				case 99: // storm of Armadyl
-				case 36: // bind
-				case 55: // snare
-				case 81: // entangle
-					if (Magic.checkCombatSpell(player, componentId, 1, false)) {
-						player.setNextFaceTile(new Tile(npc.getCoordFaceX(npc
-								.getSize()), npc.getCoordFaceY(npc.getSize()),
-								npc.getZ()));
-						if (!player.getControllerManager().canAttack(npc))
-							return;
-						if (npc instanceof Familiar) {
-							Familiar familiar = (Familiar) npc;
-							if (familiar == player.getFamiliar()) {
-								player.getPackets().sendGameMessage(
-										"You can't attack your own familiar.");
-								return;
-							}
-							if (!familiar.canAttack(player)) {
-								player.getPackets().sendGameMessage(
-										"You can't attack this npc.");
-								return;
-							}
-						} else if (!npc.isForceMultiAttacked()) {
-							if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
-								if (player.getAttackedBy() != npc
-										&& player.getAttackedByDelay() > Utilities
-												.currentTimeMillis()) {
-									player.getPackets().sendGameMessage(
-											"You are already in combat.");
-									return;
-								}
-								if (npc.getAttackedBy() != player
-										&& npc.getAttackedByDelay() > Utilities
-												.currentTimeMillis()) {
-									player.getPackets().sendGameMessage(
-											"This npc is already in combat.");
-									return;
-								}
-							}
-						}
-						player.getActionManager().setAction(
-								new PlayerCombat(npc));
-					}
+			}
+			case NPC_CLICK1_PACKET:
+				NPCHandler.handleOption1(player, stream);
+				break;
+			case NPC_CLICK2_PACKET:
+				NPCHandler.handleOption2(player, stream);
+				break;
+			case NPC_CLICK3_PACKET:
+				NPCHandler.handleOption3(player, stream);
+				break;
+			case NPC_CLICK4_PACKET:
+				NPCHandler.handleOption4(player, stream);
+				break;
+			case INTERFACE_ON_OBJECT: {
+				int interfaceHash = stream.readIntLE();
+				int objectId = stream.readInt();
+				int itemId = stream.readShortLE();
+				int y = stream.readShortLE128();
+				boolean forceRun = stream.readByte128() == 1;
+				int slot = stream.readShort();
+				int x = stream.readShortLE();
+				final int interfaceId = interfaceHash >> 16;
+				if (!player.isActive()
+						|| !player.clientHasLoadedMapRegion()
+						|| player.isDead()
+						|| Utilities.getInterfaceDefinitionsSize() <= interfaceId
+						|| !player.getInterfaceManager().containsInterface(
+								interfaceId) || player.isDead()
+						|| player.isLocked()
+						|| player.getEmotesManager().isDoingEmote())
+					return;
+				final Tile tile = new Tile(x, y, player.getZ());
+				if (!player.getMapRegionsIds().contains(tile.getRegionId()))
+					return;
+				GameObject mapObject = Engine.getRegion(tile.getRegionId())
+						.getObject(objectId, tile);
+				if (mapObject == null || mapObject.getId() != objectId)
+					return;
+				final GameObject object = !player.isAtDynamicRegion() ? mapObject
+						: new GameObject(objectId, mapObject.getType(),
+								mapObject.getRotation(), x, y, player.getZ());
+				final Item item = player.getInventory().getItem(slot);
+				if (item == null || item.getId() != itemId)
+					return;
+				player.stopAll(false); // false
+				if (forceRun)
+					player.setRun(forceRun);
+				switch (interfaceId) {
+				case Inventory.INVENTORY_INTERFACE: // inventory
+					ObjectHandler.handleItemOnObject(player, object, interfaceId,
+							item);
 					break;
 				}
 				break;
 			}
-			if (GameConstants.DEBUG)
-				System.out.println("Spell:" + componentId);
-		} else if (packetId == ATTACK_NPC) {
-			if (!player.isActive() || !player.clientHasLoadedMapRegion()
-					|| player.isDead()
-					|| player.getLockDelay() > Utilities.currentTimeMillis()) {
-				return;
-			}
-			int entityIndex = stream.readShort(); // i see
-			boolean unknown = stream.readByte() == 1;
-			if (unknown)
-				player.setRun(unknown);
-			NPC npc = Engine.getNPCs().get(entityIndex);
-			if (npc == null || npc.isDead() || npc.hasFinished()
-					|| !player.getMapRegionsIds().contains(npc.getRegionId())
-					|| !npc.getDefinitions().hasAttackOption()) {
-				return;
-			}
-			if (!player.getControllerManager().canAttack(npc)) {
-				return;
-			}
-			if (npc instanceof Familiar) {
-				Familiar familiar = (Familiar) npc;
-				if (familiar == player.getFamiliar()) {
-					player.getPackets().sendGameMessage(
-							"You can't attack your own familiar.");
+			case PLAYER_OPTION_1_PACKET: {
+				if (!player.isActive() || !player.clientHasLoadedMapRegion()
+						|| player.isDead())
+					return;
+				boolean unknown = stream.readByte() == 1;
+				int playerIndex = stream.readUnsignedShort128();
+				Player p2 = Engine.getPlayers().get(playerIndex);
+				if (p2 == null || p2.isDead() || p2.hasFinished()
+						|| !player.getMapRegionsIds().contains(p2.getRegionId()))
+					return;
+				if (player.getLockDelay() > Utilities.currentTimeMillis()
+						|| !player.getControllerManager().canPlayerOption1(p2))
+					return;
+				if (!player.isCanPvp())
+					return;
+				if (!player.getControllerManager().canAttack(p2))
+					return;
+				if (!player.isCanPvp() || !p2.isCanPvp()) {
+					player.getPackets()
+							.sendGameMessage(
+									"You can only attack players in a player-vs-player area.");
 					return;
 				}
-				if (!familiar.canAttack(player)) {
-					player.getPackets().sendGameMessage(
-							"You can't attack this npc.");
-					return;
-				}
-			} else if (!npc.isForceMultiAttacked()) {
-				if (!npc.isAtMultiArea() || !player.isAtMultiArea()) {
-					if (player.getAttackedBy() != npc
+				if (!p2.isAtMultiArea() || !player.isAtMultiArea()) {
+					if (player.getAttackedBy() != p2
 							&& player.getAttackedByDelay() > Utilities
 									.currentTimeMillis()) {
 						player.getPackets().sendGameMessage(
 								"You are already in combat.");
 						return;
 					}
-					if (npc.getAttackedBy() != player
-							&& npc.getAttackedByDelay() > Utilities
+					if (p2.getAttackedBy() != player
+							&& p2.getAttackedByDelay() > Utilities
 									.currentTimeMillis()) {
-						player.getPackets().sendGameMessage(
-								"This npc is already in combat.");
-						return;
+						if (p2.getAttackedBy() instanceof NPC) {
+							p2.setAttackedBy(player); // changes enemy to player,
+							// player has priority over
+							// npc on single areas
+						} else {
+							player.getPackets().sendGameMessage(
+									"That player is already in combat.");
+							return;
+						}
 					}
 				}
-			}
-			player.stopAll(false);
-			player.getActionManager().setAction(new PlayerCombat(npc));
-		} else if (packetId == NPC_CLICK1_PACKET) {
-			NPCHandler.handleOption1(player, stream);
-		} else if (packetId == NPC_CLICK2_PACKET) {
-			NPCHandler.handleOption2(player, stream);
-		} else if (packetId == NPC_CLICK3_PACKET) {
-			NPCHandler.handleOption3(player, stream);
-		} else if (packetId == NPC_CLICK4_PACKET) {
-			NPCHandler.handleOption4(player, stream);
-		} else if (packetId == INTERFACE_ON_OBJECT) {
-			int interfaceHash = stream.readIntLE();
-			int objectId = stream.readInt();
-			int itemId = stream.readShortLE();
-			int y = stream.readShortLE128();
-			boolean forceRun = stream.readByte128() == 1;
-			int slot = stream.readShort();
-			int x = stream.readShortLE();
-			final int interfaceId = interfaceHash >> 16;
-			if (!player.isActive()
-					|| !player.clientHasLoadedMapRegion()
-					|| player.isDead()
-					|| Utilities.getInterfaceDefinitionsSize() <= interfaceId
-					|| !player.getInterfaceManager().containsInterface(
-							interfaceId) || player.isDead()
-					|| player.isLocked()
-					|| player.getEmotesManager().isDoingEmote())
-				return;
-			final Tile tile = new Tile(x, y, player.getZ());
-			if (!player.getMapRegionsIds().contains(tile.getRegionId()))
-				return;
-			GameObject mapObject = Engine.getRegion(tile.getRegionId())
-					.getObject(objectId, tile);
-			if (mapObject == null || mapObject.getId() != objectId)
-				return;
-			final GameObject object = !player.isAtDynamicRegion() ? mapObject
-					: new GameObject(objectId, mapObject.getType(),
-							mapObject.getRotation(), x, y, player.getZ());
-			final Item item = player.getInventory().getItem(slot);
-			if (item == null || item.getId() != itemId)
-				return;
-			player.stopAll(false); // false
-			if (forceRun)
-				player.setRun(forceRun);
-			switch (interfaceId) {
-			case Inventory.INVENTORY_INTERFACE: // inventory
-				ObjectHandler.handleItemOnObject(player, object, interfaceId,
-						item);
+				player.stopAll(false);
+				player.getActionManager().setAction(new PlayerCombat(p2));
 				break;
 			}
-		} else if (packetId == PLAYER_OPTION_1_PACKET) {
-			if (!player.isActive() || !player.clientHasLoadedMapRegion()
-					|| player.isDead())
-				return;
-			boolean unknown = stream.readByte() == 1;
-			int playerIndex = stream.readUnsignedShort128();
-			Player p2 = Engine.getPlayers().get(playerIndex);
-			if (p2 == null || p2.isDead() || p2.hasFinished()
-					|| !player.getMapRegionsIds().contains(p2.getRegionId()))
-				return;
-			if (player.getLockDelay() > Utilities.currentTimeMillis()
-					|| !player.getControllerManager().canPlayerOption1(p2))
-				return;
-			if (!player.isCanPvp())
-				return;
-			if (!player.getControllerManager().canAttack(p2))
-				return;
-			if (!player.isCanPvp() || !p2.isCanPvp()) {
-				player.getPackets()
-						.sendGameMessage(
-								"You can only attack players in a player-vs-player area.");
-				return;
+			case PLAYER_OPTION_2_PACKET: {
+				if (!player.isActive() || !player.clientHasLoadedMapRegion()
+						|| player.isDead())
+					return;
+				boolean unknown = stream.readByte() == 1;
+				int playerIndex = stream.readUnsignedShort128();
+				Player p2 = Engine.getPlayers().get(playerIndex);
+				if (p2 == null || p2.isDead() || p2.hasFinished()
+						|| !player.getMapRegionsIds().contains(p2.getRegionId()))
+					return;
+				if (player.getLockDelay() > Utilities.currentTimeMillis())
+					return;
+				if (player.getControllerManager().getController() instanceof DuelArena)
+					return;
+				player.stopAll(false);
+				player.getActionManager().setAction(new PlayerFollow(p2));
+				break;
 			}
-			if (!p2.isAtMultiArea() || !player.isAtMultiArea()) {
-				if (player.getAttackedBy() != p2
-						&& player.getAttackedByDelay() > Utilities
-								.currentTimeMillis()) {
-					player.getPackets().sendGameMessage(
-							"You are already in combat.");
+			case PLAYER_OPTION_4_PACKET: {
+				boolean unknown = stream.readByte() == 1;
+				int playerIndex = stream.readUnsignedShort128();
+				Player p2 = Engine.getPlayers().get(playerIndex);
+				if (p2 == null || p2.isDead() || p2.hasFinished()
+						|| !player.getMapRegionsIds().contains(p2.getRegionId())
+						|| player.getLockDelay() >= Utilities.currentTimeMillis()
+						|| player == p2)
+					return;
+				player.stopAll(false);
+				player.faceEntity(p2);
+				if (player.checkTotalLevel(300) < 300) {
+					player.sendMessage("You need atleast a total level of 300 to trade.");
 					return;
 				}
-				if (p2.getAttackedBy() != player
-						&& p2.getAttackedByDelay() > Utilities
-								.currentTimeMillis()) {
-					if (p2.getAttackedBy() instanceof NPC) {
-						p2.setAttackedBy(player); // changes enemy to player,
-						// player has priority over
-						// npc on single areas
-					} else {
-						player.getPackets().sendGameMessage(
-								"That player is already in combat.");
-						return;
-					}
+				if (p2.getInterfaceManager().containsScreenInter()) {
+					player.getPackets()
+							.sendGameMessage("The other player is busy.");
+					return;
 				}
-			}
-			player.stopAll(false);
-			player.getActionManager().setAction(new PlayerCombat(p2));
-		} else if (packetId == PLAYER_OPTION_2_PACKET) {
-			if (!player.isActive() || !player.clientHasLoadedMapRegion()
-					|| player.isDead())
-				return;
-			boolean unknown = stream.readByte() == 1;
-			int playerIndex = stream.readUnsignedShort128();
-			Player p2 = Engine.getPlayers().get(playerIndex);
-			if (p2 == null || p2.isDead() || p2.hasFinished()
-					|| !player.getMapRegionsIds().contains(p2.getRegionId()))
-				return;
-			if (player.getLockDelay() > Utilities.currentTimeMillis())
-				return;
-			if (player.getControllerManager().getController() instanceof DuelArena)
-				return;
-			player.stopAll(false);
-			player.getActionManager().setAction(new PlayerFollow(p2));
-		} else if (packetId == PLAYER_OPTION_4_PACKET) {
-			boolean unknown = stream.readByte() == 1;
-			int playerIndex = stream.readUnsignedShort128();
-			Player p2 = Engine.getPlayers().get(playerIndex);
-			if (p2 == null || p2.isDead() || p2.hasFinished()
-					|| !player.getMapRegionsIds().contains(p2.getRegionId())
-					|| player.getLockDelay() >= Utilities.currentTimeMillis()
-					|| player == p2)
-				return;
-			player.stopAll(false);
-			player.faceEntity(p2);
-			if (player.checkTotalLevel(300) < 300) {
-				player.sendMessage("You need atleast a total level of 300 to trade.");
-				return;
-			}
-			if (p2.getInterfaceManager().containsScreenInter()) {
-				player.getPackets()
-						.sendGameMessage("The other player is busy.");
-				return;
-			}
-			if (player.getX() == p2.getX() && player.getY() == p2.getY()) {
-				if (!player.addWalkSteps(player.getX() - 1, player.getY(), 1))
-					if (!player.addWalkSteps(player.getX() + 1, player.getY(),
-							1))
-						if (!player.addWalkSteps(player.getX(),
-								player.getY() + 1, 1))
-							player.addWalkSteps(player.getX(),
-									player.getY() - 1, 1);
-			}
-			if (player.getX() == p2.getX() && player.getY() == p2.getY()) {
-				player.getPackets().sendGameMessage("Unable to trade here.");
-				return;
-			}
-			if (!p2.withinDistance(player, 14)) {
+				if (player.getX() == p2.getX() && player.getY() == p2.getY()) {
+					if (!player.addWalkSteps(player.getX() - 1, player.getY(), 1))
+						if (!player.addWalkSteps(player.getX() + 1, player.getY(),
+								1))
+							if (!player.addWalkSteps(player.getX(),
+									player.getY() + 1, 1))
+								player.addWalkSteps(player.getX(),
+										player.getY() - 1, 1);
+				}
+				if (player.getX() == p2.getX() && player.getY() == p2.getY()) {
+					player.getPackets().sendGameMessage("Unable to trade here.");
+					return;
+				}
+				if (!p2.withinDistance(player, 14)) {
+					player.getPackets().sendGameMessage(
+							"Unable to find target " + p2.getDisplayName());
+					return;
+				}
+				if (p2.getTemporaryAttributtes().get("TradeTarget") == player) {
+					p2.getTemporaryAttributtes().remove("TradeTarget");
+					player.getTrade().openTrade(p2);
+					p2.getTrade().openTrade(player);
+					return;
+				}
+				player.getTemporaryAttributtes().put("TradeTarget", p2);
 				player.getPackets().sendGameMessage(
-						"Unable to find target " + p2.getDisplayName());
-				return;
+						"Sending " + p2.getDisplayName() + " a request...");
+				p2.getPackets().sendTradeRequestMessage(player);
+				break;
 			}
-			if (p2.getTemporaryAttributtes().get("TradeTarget") == player) {
-				p2.getTemporaryAttributtes().remove("TradeTarget");
-				player.getTrade().openTrade(p2);
-				p2.getTrade().openTrade(player);
-				return;
+			case PLAYER_OPTION_9_PACKET: {
+				boolean unknown = stream.readByte() == 1;
+				int playerIndex = stream.readShort128();
+				System.out.println(playerIndex);
+				Player p2 = Engine.getPlayers().get(playerIndex);
+				if (p2 == null || p2 == player || p2.isDead() || p2.hasFinished()
+						|| !player.getMapRegionsIds().contains(p2.getRegionId()))
+					return;
+				if (player.isLocked())
+					return;
+				if (unknown)
+					player.setRun(unknown);
+				player.stopAll();
+				ClansManager.viewInvite(player, p2);
+				break;
 			}
-			player.getTemporaryAttributtes().put("TradeTarget", p2);
-			player.getPackets().sendGameMessage(
-					"Sending " + p2.getDisplayName() + " a request...");
-			p2.getPackets().sendTradeRequestMessage(player);
-		} else if (packetId == PLAYER_OPTION_9_PACKET) {
-			boolean unknown = stream.readByte() == 1;
-			int playerIndex = stream.readShort128();
-			System.out.println(playerIndex);
-			Player p2 = Engine.getPlayers().get(playerIndex);
-			if (p2 == null || p2 == player || p2.isDead() || p2.hasFinished()
-					|| !player.getMapRegionsIds().contains(p2.getRegionId()))
-				return;
-			if (player.isLocked())
-				return;
-			if (unknown)
-				player.setRun(unknown);
-			player.stopAll();
-			ClansManager.viewInvite(player, p2);
-		} else if (packetId == ITEM_TAKE_PACKET) {
-			if (!player.isActive() || !player.clientHasLoadedMapRegion()
-					|| player.isDead())
-				return;
-			long currentTime = Utilities.currentTimeMillis();
-			if (player.getLockDelay() > currentTime)
-				return;
-			boolean forceRun = stream.readByte() == 1;
-			final int id = stream.readShort128();
-			int y = stream.readShortLE();
-			int x = stream.readShort128();
-			final Tile tile = new Tile(x, y, player.getZ());
-			final int regionId = tile.getRegionId();
-			if (!player.getMapRegionsIds().contains(regionId))
-				return;
-			final FloorItem item = Engine.getRegion(regionId).getGroundItem(id,
-					tile, player);
-			if (item == null)
-				return;
-			player.stopAll(false);
-			if (forceRun)
-				player.setRun(forceRun);
+			case ITEM_TAKE_PACKET: {
+				if (!player.isActive() || !player.clientHasLoadedMapRegion()
+						|| player.isDead())
+					return;
+				long currentTime = Utilities.currentTimeMillis();
+				if (player.getLockDelay() > currentTime)
+					return;
+				boolean forceRun = stream.readByte() == 1;
+				final int id = stream.readShort128();
+				int y = stream.readShortLE();
+				int x = stream.readShort128();
+				final Tile tile = new Tile(x, y, player.getZ());
+				final int regionId = tile.getRegionId();
+				if (!player.getMapRegionsIds().contains(regionId))
+					return;
+				final FloorItem item = Engine.getRegion(regionId).getGroundItem(id,
+						tile, player);
+				if (item == null)
+					return;
+				player.stopAll(false);
+				if (forceRun)
+					player.setRun(forceRun);
 
-			player.setRouteEvent(new RouteEvent(item, new Runnable() {
-				@Override
-				public void run() {
-					final FloorItem item = Engine.getRegion(regionId)
-							.getGroundItem(id, tile, player);
-					if (item == null)
-						return;
-					player.setNextFaceTile(tile);
-					player.addWalkSteps(tile.getX(), tile.getY(), 1);
-					Engine.removeGroundItem(player, item);
-				}
-			}));
+				player.setRouteEvent(new RouteEvent(item, new Runnable() {
+					@Override
+					public void run() {
+						final FloorItem item = Engine.getRegion(regionId)
+								.getGroundItem(id, tile, player);
+						if (item == null)
+							return;
+						player.setNextFaceTile(tile);
+						player.addWalkSteps(tile.getX(), tile.getY(), 1);
+						Engine.removeGroundItem(player, item);
+					}
+				}));
+			}
+				break;
 		}
 	}
 
@@ -1376,17 +1416,29 @@ public final class WorldPacketsDecoder extends Decoder {
 	}
 
 	private int chatType;
-
+	
+	
+	/**
+	 * 
+	 * @param opcode
+	 * @param length
+	 * @param stream
+	 * 
+	 * All out-commented opcodes we're duplicated {@code -1}, get the real opcode and make them functional again.
+	 */
 	public void processPackets(final int opcode, final int length,
 			InputStream stream) {
 		player.setPacketsDecoderPing(Utilities.currentTimeMillis());
-		if (opcode == PING_PACKET) {
+		switch (opcode) {
+		case PING_PACKET:
 			OutputStream packet = new OutputStream(0);
 			packet.writeFixedPacket(player, 12);
 			player.getSession().write(packet);
-		} else if (opcode == CLIENT_FOCUS_PACKET) {
+			break;
+		case CLIENT_FOCUS_PACKET:
 			boolean clientFocus = stream.readUnsignedByte() == 1;
-		} else if (opcode == DISPLAY_PACKET) {
+			break;
+		case DISPLAY_PACKET:
 			int displayMode = stream.readByte();
 			player.setScreenWidth(stream.readShort());
 			player.setScreenHeight(stream.readShort());
@@ -1394,9 +1446,11 @@ public final class WorldPacketsDecoder extends Decoder {
 			player.setDisplayMode(displayMode);
 			player.getInterfaceManager().removeAll();
 			player.getInterfaceManager().sendInterfaces();
-		} else if (opcode == ITEM_ON_ITEM_PACKET) {
+			break;
+		case ITEM_ON_ITEM_PACKET:
 			InventoryOptionsHandler.handleItemOnItem(player, stream);
-		} else if (opcode == GROUND_ITEM_EXAMINE_PACKET) {
+			break;
+		case GROUND_ITEM_EXAMINE_PACKET:
 			boolean forceRun = stream.readByte() == 1;
 			int id = stream.readShort128();
 			int y = stream.readShortLE();
@@ -1413,9 +1467,11 @@ public final class WorldPacketsDecoder extends Decoder {
 										+ " value: "
 										+ item.getDefinitions().getValue());
 			}
-		} else if (opcode == RECEIVE_PACKET_COUNT_PACKET) {
+			break;
+		case RECEIVE_PACKET_COUNT_PACKET:
 			int packetcount = stream.readInt();
-		} else if (opcode == DIALOGUE_CONTINUE_PACKET) {
+			break;
+		case DIALOGUE_CONTINUE_PACKET: {
 			int junk = stream.readShortLE();
 			int interfaceHash = stream.readIntV1();
 			int interfaceId = interfaceHash >> 16;
@@ -1433,14 +1489,17 @@ public final class WorldPacketsDecoder extends Decoder {
 			int componentId = interfaceHash - (interfaceId << 16);
 			player.getDialogueManager().continueDialogue(interfaceId,
 					componentId);
-		} else if (opcode == CLOSE_INTERFACE_PACKET) {
+			break;
+		}
+		case CLOSE_INTERFACE_PACKET:
 			if (player.isActive() && !player.hasFinished()
 					&& !player.isRunning()) {
 				player.run();
 				return;
 			}
 			player.stopAll();
-		} else if (opcode == SAVE_PLAYER_PACKET) {
+			break;
+		case SAVE_PLAYER_PACKET:
 			SerializableFilesManager.savePlayer(player);
 			if (player.getClanName() != null) {
 				Clan clan = new Clan(player.getClanName(), player);
@@ -1450,7 +1509,8 @@ public final class WorldPacketsDecoder extends Decoder {
 			IPBanL.save();
 			PkRank.save();
 			DTRank.save();
-		} else if (opcode == WorldPacketsDecoder.ENTER_INTEGER_PACKET) {
+			break;
+		case ENTER_INTEGER_PACKET: {
 			if (!player.isRunning() || player.isDead())
 				return;
 			int value = stream.readInt();
@@ -1558,7 +1618,9 @@ public final class WorldPacketsDecoder extends Decoder {
 						index, itemId, value))
 					return;
 			}
-		} else if (opcode == ENTER_NAME_PACKET) {
+			break;
+		}
+		case ENTER_NAME_PACKET: {
 			if (!player.isRunning() || player.isDead())
 				return;
 			String value = stream.readString();
@@ -1588,7 +1650,9 @@ public final class WorldPacketsDecoder extends Decoder {
 			} else if (player.getTemporaryAttributtes()
 					.remove("checkvoteinput") != null)
 				player.getPackets().sendGameMessage("Unknown action.");
-		} else if (opcode == ENTER_LONG_TEXT_PACKET) {
+			break;
+		}
+		case ENTER_LONG_TEXT_PACKET: {
 			if (!player.isRunning() || player.isDead())
 				return;
 			String value = stream.readString();
@@ -1644,7 +1708,9 @@ public final class WorldPacketsDecoder extends Decoder {
 						"Your display name was successfully changed.");
 			} else if (player.getInterfaceManager().containsInterface(1103))
 				ClansManager.setClanMottoInterface(player, value);
-		} else if (opcode == COLOR_ID_PACKET) {
+			break;
+		}
+		case COLOR_ID_PACKET:
 			if (!player.isActive())
 				return;
 			int colorId = stream.readUnsignedShort();
@@ -1653,7 +1719,8 @@ public final class WorldPacketsDecoder extends Decoder {
 						colorId);
 			else if (player.getTemporaryAttributtes().get("MottifCustomize") != null)
 				ClansManager.setMottifColor(player, colorId);
-		} else if (opcode == SWITCH_INTERFACE_ITEM_PACKET) {
+			break;
+		case SWITCH_INTERFACE_ITEM_PACKET:
 			int fromSlot = stream.readShort();
 			stream.readShortLE128();
 			stream.readShort128();
@@ -1726,45 +1793,33 @@ public final class WorldPacketsDecoder extends Decoder {
 			if (GameConstants.DEBUG)
 				System.out.println("Switch item " + fromInterfaceId + ", "
 						+ fromSlot + ", " + toSlot);
-		} else if (opcode == WALKING_PACKET || opcode == MINI_WALKING_PACKET
-				|| opcode == ITEM_TAKE_PACKET
-				|| opcode == PLAYER_OPTION_2_PACKET
-				|| opcode == PLAYER_OPTION_4_PACKET
-				|| opcode == PLAYER_OPTION_6_PACKET
-				|| opcode == PLAYER_OPTION_1_PACKET
-				|| opcode == PLAYER_OPTION_9_PACKET || opcode == ATTACK_NPC
-				|| opcode == INTERFACE_ON_PLAYER || opcode == INTERFACE_ON_NPC
-				|| opcode == NPC_CLICK1_PACKET || opcode == NPC_CLICK2_PACKET
-				|| opcode == NPC_CLICK3_PACKET || opcode == NPC_CLICK4_PACKET
-				|| opcode == OBJECT_CLICK1_PACKET
-				|| opcode == SWITCH_INTERFACE_ITEM_PACKET
-				|| opcode == OBJECT_CLICK2_PACKET
-				|| opcode == OBJECT_CLICK3_PACKET
-				|| opcode == OBJECT_CLICK4_PACKET
-				|| opcode == OBJECT_CLICK5_PACKET
-				|| opcode == INTERFACE_ON_OBJECT) {
-			player.addLogicPacketToQueue(new LogicPacket(opcode, length, stream));
-		} else if (opcode == OBJECT_EXAMINE_PACKET) {
-			ObjectHandler.handleOption(player, stream, -1);
-		} else if (opcode == ADD_FRIEND_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().addFriend(stream.readString());
-		} else if (opcode == REMOVE_FRIEND_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().removeFriend(stream.readString());
-		} else if (opcode == ADD_IGNORE_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().addIgnore(stream.readString(),
-					stream.readUnsignedByte() == 1);
-		} else if (opcode == REMOVE_IGNORE_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().removeIgnore(stream.readString());
-		} else if (opcode == SEND_FRIEND_MESSAGE_PACKET) {
-			if (player.getLastPrivateMessage() > Utilities.currentTimeMillis())
+			break;
+			case OBJECT_EXAMINE_PACKET:
+				ObjectHandler.handleOption(player, stream, -1);
+				break;
+			case ADD_FRIEND_PACKET:
+				if (!player.isActive())
+					return;
+				player.getFriendsIgnores().addFriend(stream.readString());
+				break;
+			case REMOVE_FRIEND_PACKET:
+				if (!player.isActive())
+					return;
+				player.getFriendsIgnores().removeFriend(stream.readString());
+				break;
+			case ADD_IGNORE_PACKET:
+				if (!player.isActive())
+					return;
+				player.getFriendsIgnores().addIgnore(stream.readString(),
+						stream.readUnsignedByte() == 1);
+				break;
+			case REMOVE_IGNORE_PACKET:
+				if (!player.isActive())
+					return;
+				player.getFriendsIgnores().removeIgnore(stream.readString());
+				break;
+			case SEND_FRIEND_MESSAGE_PACKET: {
+				if (player.getLastPrivateMessage() > Utilities.currentTimeMillis())
 	                return;
 			if (!player.isActive()
 					&& !Engine.containsLobbyPlayer(player.getUsername()) )
@@ -1792,175 +1847,194 @@ public final class WorldPacketsDecoder extends Decoder {
 			LoggingSystem.logPm(player, p2, Utilities.fixChatMessage(message));
 			player.getFriendsIgnores().sendMessage(p2,
 					Utilities.fixChatMessage(message));
-			
-		} else if (opcode == WorldPacketsDecoder.SEND_FRIEND_QUICK_CHAT_PACKET) {
-            if (!player.isActive() && !Engine.containsLobbyPlayer(player.getUsername()))
-                return;
-            String username = stream.readString();
-            int fileId = stream.readUnsignedShort();
-            if (!Utilities.isValidQuickChat(fileId))
-				return;
-            byte[] data = null;
-            if (length > 3 + username.length()) {
-                data = new byte[length - (3 + username.length())];
-                stream.readBytes(data);
-            }
-            data = Utilities.completeQuickMessage(player, fileId, data);
-            Player p2 = Engine.getPlayerByDisplayName(username);
-            if (p2 == null) {
-                p2 = Engine.getLobbyPlayerByDisplayName(username); // getLobbyPlayerByDisplayName
-                if (p2 == null)
-                    return;
-            }
-            player.getFriendsIgnores().sendQuickChatMessage(p2, new QuickChatMessage(fileId, data));
-		} else if (opcode == ADD_FRIEND_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().addFriend(stream.readString());
-		} else if (opcode == REMOVE_FRIEND_PACKET) {
-			if (!player.isActive())
-				return;
-			player.getFriendsIgnores().removeFriend(stream.readString());
-		} else if (opcode == CHAT_TYPE_PACKET) {
-			chatType = stream.readUnsignedByte();
-		} else if (opcode == CHAT_PACKET) {
-			if (!player.isActive()
-					|| player.getLastPublicMessage() > Utilities
-							.currentTimeMillis())
-				return;
-			int colorEffect = stream.readByte();
-			int moveEffect = stream.readByte();
-			String message = Huffman.readEncryptedMessage(200, stream);
-			if (message == null)
-				return;
-			if (message.startsWith("::") || message.startsWith(";;")) {
-				if (!player.getControllerManager().processCommand(
-						message.replace("::", "").replace(";;", ""), false,
-						false))
+				break;
+			}
+			case SEND_FRIEND_QUICK_CHAT_PACKET: {
+				if (!player.isActive() && !Engine.containsLobbyPlayer(player.getUsername()))
+	                return;
+	            String username = stream.readString();
+	            int fileId = stream.readUnsignedShort();
+	            if (!Utilities.isValidQuickChat(fileId))
 					return;
-				Commands.processCommand(player, message.replace("::", "")
-						.replace(";;", ""), false, false);
-				return;
+	            byte[] data = null;
+	            if (length > 3 + username.length()) {
+	                data = new byte[length - (3 + username.length())];
+	                stream.readBytes(data);
+	            }
+	            data = Utilities.completeQuickMessage(player, fileId, data);
+	            Player p2 = Engine.getPlayerByDisplayName(username);
+	            if (p2 == null) {
+	                p2 = Engine.getLobbyPlayerByDisplayName(username); // getLobbyPlayerByDisplayName
+	                if (p2 == null)
+	                    return;
+	            }
+	            player.getFriendsIgnores().sendQuickChatMessage(p2, new QuickChatMessage(fileId, data));
+				break;
 			}
-			if (player.getMuted() > Utilities.currentTimeMillis()) {
-				player.getPackets()
-						.sendGameMessage(
-								"You are muted and cannot talk. You can apply this at forums.");
-				return;
-			}
-			if (IPMute.isMuted(player.getSession().getIP())) {
-				player.getPackets()
-						.sendGameMessage(
-								"You are IP-muted and cannot talk. You 'may' apply this at forums. However in must cases it will be declined.");
-				return;
-			}
-			int effects = Utilities.fixChatEffects(player.getUsername(),
-					colorEffect, moveEffect);
-			if (chatType == 1) {
-				player.sendFriendsChannelMessage(Utilities
-						.fixChatMessage(message));
-			} else if (chatType == 2) {
-				player.sendClanChannelMessage(new ChatMessage(Utilities
-						.fixChatMessage(message)));
-			} else if (chatType == 3) {
-				player.sendGuestClanChannelMessage(new ChatMessage(Utilities
-						.fixChatMessage(message)));
-			} else {
-				player.sendPublicChatMessage(new PublicChatMessage(Utilities
-						.fixChatMessage(message), effects));
-			}
-			player.setLastPublicMessage(Utilities.currentTimeMillis() + 300);
-			LoggingSystem.logPublicChat(player, message);
-			if (GameConstants.DEBUG)
-				Logger.log(this, "Chat type: " + chatType);
-		} else if (opcode == JOIN_FRIEND_CHAT_PACKET) {
-			if (!player.isActive()
-					&& !Engine.containsLobbyPlayer(player.getUsername()) || player.getLastJoined() > Utilities
-					.currentTimeMillis())
-				return;
-			FriendChatsManager.joinChat(stream.readString(), player);
-		} else if (opcode == KICK_FRIEND_CHAT_PACKET) {
-			if (!player.isActive())
-				return;
-			player.setLastPublicMessage(Utilities.currentTimeMillis() + 1000); // avoids
-			// message
-			// appearing
-			player.kickPlayerFromFriendsChannel(stream.readString());
-		} else if (opcode == CHANGE_FRIEND_CHAT_PACKET) {
-			if (!player.isActive()
-					|| !player.getInterfaceManager().containsInterface(1108))
-				return;
-			player.getFriendsIgnores().changeRank(stream.readString(),
-					stream.readByte());
-		} else if (opcode == FORUM_THREAD_ID_PACKET) {
-			String threadId = stream.readString();
-			if (player.getInterfaceManager().containsInterface(1100))
-				ClansManager.setThreadIdInterface(player, threadId);
-			else if (GameConstants.DEBUG)
-				Logger.log(this, "Called FORUM_THREAD_ID_PACKET: " + threadId);
-		} else if (opcode == OPEN_URL_PACKET) {
-			String type = stream.readString();
-			String path = stream.readString();
-			String unknown = stream.readString();
-			int flag = stream.readUnsignedByte();
-		} else if (opcode == COMMANDS_PACKET) {
-			if (!player.isRunning() || player.getLastCommand() > Utilities
-					.currentTimeMillis())
-				return;
-			boolean clientCommand = stream.readUnsignedByte() == 1;
-			stream.readUnsignedByte();
-			String command = stream.readString();
-			if (!Commands.processCommand(player, command, true, clientCommand)
-					&& GameConstants.DEBUG)
-				Logger.log(this, "Command: " + command);
-		} else if (opcode == NPC_EXAMINE_PACKET) {
-			NPCHandler.handleExamine(player, stream);
-		} else if (opcode == PUBLIC_QUICK_CHAT_PACKET) {
-			if (!player.isActive())
-				return;
-			if (player.getLastPublicMessage() > Utilities.currentTimeMillis())
-				return;
-			player.setLastPublicMessage(Utilities.currentTimeMillis() + 300);
-			boolean secondClientScript = stream.readByte() == 1;
-			int fileId = stream.readUnsignedShort();
-			if (!Utilities.isValidQuickChat(fileId))
-				return;
-			byte[] data = null;
-			if (length > 3) {
-				data = new byte[length - 3];
-				stream.readBytes(data);
-			}
-			data = Utilities.completeQuickMessage(player, fileId, data);
-			if (chatType == 0)
-				player.sendPublicChatMessage(new QuickChatMessage(fileId, data));
-			else if (chatType == 1)
-				player.sendFriendsChannelQuickMessage(new QuickChatMessage(
-						fileId, data));
-			else if (chatType == 2)
-				player.sendClanChannelQuickMessage(new QuickChatMessage(fileId,
-						data));
-			else if (chatType == 3)
-				player.sendGuestClanChannelQuickMessage(new QuickChatMessage(
-						fileId, data));
-			else if (GameConstants.DEBUG)
-				Logger.log(this, "Unknown chat type: " + chatType);
-		} else if (opcode == ACTION_BUTTON1_PACKET
-				|| opcode == ACTION_BUTTON2_PACKET
-				|| opcode == ACTION_BUTTON4_PACKET
-				|| opcode == ACTION_BUTTON5_PACKET
-				|| opcode == ACTION_BUTTON6_PACKET
-				|| opcode == ACTION_BUTTON7_PACKET
-				|| opcode == ACTION_BUTTON8_PACKET
-				|| opcode == ACTION_BUTTON3_PACKET
-				|| opcode == ACTION_BUTTON9_PACKET
-				|| opcode == ACTION_BUTTON10_PACKET) {
-			ButtonHandler.handleButtons(player, stream, opcode);
-		} else if (opcode == WorldPacketsDecoder.DONE_LOADING_REGION_PACKET) {
-			/*
-			 * if(!player.clientHasLoadedMapRegion()) { //load objects and items
-			 * player.setClientHasLoadedMapRegion(); }
-			 * player.refreshSpawnedObjects(); player.refreshSpawnedItems();
-			 */
+			case CHAT_TYPE_PACKET:
+				chatType = stream.readUnsignedByte();
+				break;
+			case CHAT_PACKET:
+				if (!player.isActive()
+						|| player.getLastPublicMessage() > Utilities
+								.currentTimeMillis())
+					return;
+				int colorEffect = stream.readByte();
+				int moveEffect = stream.readByte();
+				String message = Huffman.readEncryptedMessage(200, stream);
+				if (message == null)
+					return;
+				if (message.startsWith("::") || message.startsWith(";;")) {
+					if (!player.getControllerManager().processCommand(
+							message.replace("::", "").replace(";;", ""), false,
+							false))
+						return;
+					Commands.processCommand(player, message.replace("::", "")
+							.replace(";;", ""), false, false);
+					return;
+				}
+				if (player.getMuted() > Utilities.currentTimeMillis()) {
+					player.getPackets()
+							.sendGameMessage(
+									"You are muted and cannot talk. You can apply this at forums.");
+					return;
+				}
+				if (IPMute.isMuted(player.getSession().getIP())) {
+					player.getPackets()
+							.sendGameMessage(
+									"You are IP-muted and cannot talk. You 'may' apply this at forums. However in must cases it will be declined.");
+					return;
+				}
+				int effects = Utilities.fixChatEffects(player.getUsername(),
+						colorEffect, moveEffect);
+				if (chatType == 1) {
+					player.sendFriendsChannelMessage(Utilities
+							.fixChatMessage(message));
+				} else if (chatType == 2) {
+					player.sendClanChannelMessage(new ChatMessage(Utilities
+							.fixChatMessage(message)));
+				} else if (chatType == 3) {
+					player.sendGuestClanChannelMessage(new ChatMessage(Utilities
+							.fixChatMessage(message)));
+				} else {
+					player.sendPublicChatMessage(new PublicChatMessage(Utilities
+							.fixChatMessage(message), effects));
+				}
+				player.setLastPublicMessage(Utilities.currentTimeMillis() + 300);
+				LoggingSystem.logPublicChat(player, message);
+				if (GameConstants.DEBUG)
+					Logger.log(this, "Chat type: " + chatType);
+				break;
+			case JOIN_FRIEND_CHAT_PACKET:
+				if (!player.isActive()
+						&& !Engine.containsLobbyPlayer(player.getUsername()) || player.getLastJoined() > Utilities
+						.currentTimeMillis())
+					return;
+				FriendChatsManager.joinChat(stream.readString(), player);
+				break;
+			case KICK_FRIEND_CHAT_PACKET:
+				if (!player.isActive())
+					return;
+				player.setLastPublicMessage(Utilities.currentTimeMillis() + 1000);
+				player.kickPlayerFromFriendsChannel(stream.readString());
+				break;
+			case CHANGE_FRIEND_CHAT_PACKET:
+				if (!player.isActive()
+						|| !player.getInterfaceManager().containsInterface(1108))
+					return;
+				player.getFriendsIgnores().changeRank(stream.readString(),
+						stream.readByte());
+				break;
+			/*case FORUM_THREAD_ID_PACKET: {
+				String threadId = stream.readString();
+				if (player.getInterfaceManager().containsInterface(1100))
+					ClansManager.setThreadIdInterface(player, threadId);
+				else if (GameConstants.DEBUG)
+					Logger.log(this, "Called FORUM_THREAD_ID_PACKET: " + threadId);
+				break;
+			case OPEN_URL_PACKET:
+				String type = stream.readString();
+				String path = stream.readString();
+				String unknown = stream.readString();
+				int flag = stream.readUnsignedByte();
+				break;*/
+			case COMMANDS_PACKET:
+				if (!player.isRunning() || player.getLastCommand() > Utilities
+						.currentTimeMillis())
+					return;
+				boolean clientCommand = stream.readUnsignedByte() == 1;
+				stream.readUnsignedByte();
+				String command = stream.readString();
+				if (!Commands.processCommand(player, command, true, clientCommand)
+						&& GameConstants.DEBUG)
+					Logger.log(this, "Command: " + command);
+				break;
+			case NPC_EXAMINE_PACKET:
+				NPCHandler.handleExamine(player, stream);
+				break;
+			case PUBLIC_QUICK_CHAT_PACKET:
+				if (!player.isActive())
+					return;
+				if (player.getLastPublicMessage() > Utilities.currentTimeMillis())
+					return;
+				player.setLastPublicMessage(Utilities.currentTimeMillis() + 300);
+				boolean secondClientScript = stream.readByte() == 1;
+				int fileId = stream.readUnsignedShort();
+				if (!Utilities.isValidQuickChat(fileId))
+					return;
+				byte[] data = null;
+				if (length > 3) {
+					data = new byte[length - 3];
+					stream.readBytes(data);
+				}
+				data = Utilities.completeQuickMessage(player, fileId, data);
+				if (chatType == 0)
+					player.sendPublicChatMessage(new QuickChatMessage(fileId, data));
+				else if (chatType == 1)
+					player.sendFriendsChannelQuickMessage(new QuickChatMessage(
+							fileId, data));
+				else if (chatType == 2)
+					player.sendClanChannelQuickMessage(new QuickChatMessage(fileId,
+							data));
+				else if (chatType == 3)
+					player.sendGuestClanChannelQuickMessage(new QuickChatMessage(
+							fileId, data));
+				else if (GameConstants.DEBUG)
+					Logger.log(this, "Unknown chat type: " + chatType);
+				break;
+			case ACTION_BUTTON1_PACKET:
+			case ACTION_BUTTON2_PACKET:
+			case ACTION_BUTTON3_PACKET:
+			case ACTION_BUTTON4_PACKET:
+			case ACTION_BUTTON5_PACKET:
+			case ACTION_BUTTON6_PACKET:
+			//case ACTION_BUTTON7_PACKET:
+			case ACTION_BUTTON8_PACKET:
+			//case ACTION_BUTTON9_PACKET:
+			case ACTION_BUTTON10_PACKET:
+				ButtonHandler.handleButtons(player, stream, opcode);
+				break;
+			case DONE_LOADING_REGION_PACKET:
+				break;
+		}
+		 if (opcode == WALKING_PACKET || opcode == MINI_WALKING_PACKET
+				 || opcode == ITEM_TAKE_PACKET
+				 || opcode == PLAYER_OPTION_2_PACKET
+				 || opcode == PLAYER_OPTION_4_PACKET
+				 || opcode == PLAYER_OPTION_6_PACKET
+				 || opcode == PLAYER_OPTION_1_PACKET
+				 || opcode == PLAYER_OPTION_9_PACKET || opcode == ATTACK_NPC
+				 || opcode == INTERFACE_ON_PLAYER || opcode == INTERFACE_ON_NPC
+				 || opcode == NPC_CLICK1_PACKET || opcode == NPC_CLICK2_PACKET
+				 || opcode == NPC_CLICK3_PACKET || opcode == NPC_CLICK4_PACKET
+				 || opcode == OBJECT_CLICK1_PACKET
+				 || opcode == SWITCH_INTERFACE_ITEM_PACKET
+				 || opcode == OBJECT_CLICK2_PACKET
+				 || opcode == OBJECT_CLICK3_PACKET
+				 || opcode == OBJECT_CLICK4_PACKET
+				 || opcode == OBJECT_CLICK5_PACKET
+				 || opcode == INTERFACE_ON_OBJECT) {
+			 player.addLogicPacketToQueue(new LogicPacket(opcode, length, stream));
 		} else {
 			Logger.log(this, "Unhandled Packet : " + opcode);
 		}
