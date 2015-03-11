@@ -2035,8 +2035,6 @@ public final class WorldPacketsDecoder extends Decoder {
 				 || opcode == OBJECT_CLICK5_PACKET
 				 || opcode == INTERFACE_ON_OBJECT) {
 			 player.addLogicPacketToQueue(new LogicPacket(opcode, length, stream));
-		} else {
-			Logger.log(this, "Unhandled Packet : " + opcode);
 		}
 	}
 }

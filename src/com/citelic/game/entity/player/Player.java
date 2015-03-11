@@ -214,7 +214,7 @@ public class Player extends Entity {
 	/*
 	 * Juju
 	 */
-	private transient int[] juju = {0, 0, 0, 0, 0};
+	private int[] juju = new int[6];
 	
 	/*
 	 * Lodestones
