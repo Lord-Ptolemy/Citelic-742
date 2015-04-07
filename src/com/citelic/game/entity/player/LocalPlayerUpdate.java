@@ -41,10 +41,10 @@ public final class LocalPlayerUpdate {
 		this.player = player;
 		slotFlags = new byte[2048];
 		localPlayers = new Player[2048];
-		localPlayersIndexes = new int[GameConstants.SV_PLAYERS_LIMIT];
+		localPlayersIndexes = new int[GameConstants.PLAYERS_LIMIT];
 		outPlayersIndexes = new int[2048];
 		regionHashes = new int[2048];
-		cachedAppearencesHashes = new byte[GameConstants.SV_PLAYERS_LIMIT][];
+		cachedAppearencesHashes = new byte[GameConstants.PLAYERS_LIMIT][];
 	}
 
 	private void appendUpdateBlock(Player p, OutputStream data,
@@ -330,7 +330,7 @@ public final class LocalPlayerUpdate {
 	}
 
 	public boolean needAppearenceUpdate(int index, byte[] hash) {
-		if (totalRenderDataSentLength > ((GameConstants.SV_PACKET_SIZE_LIMIT - 500) / 2)
+		if (totalRenderDataSentLength > ((GameConstants.PACKET_SIZE_LIMIT - 500) / 2)
 				|| hash == null)
 			return false;
 		return cachedAppearencesHashes[index] == null

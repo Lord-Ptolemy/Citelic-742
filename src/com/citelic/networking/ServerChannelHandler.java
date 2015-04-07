@@ -100,7 +100,7 @@ public final class ServerChannelHandler extends SimpleChannelHandler {
 			ChannelBuffer buf = (ChannelBuffer) e.getMessage();
 			buf.markReaderIndex();
 			int avail = buf.readableBytes();
-			if (avail < 1 || avail > GameConstants.SV_RECEIVE_DATA_LIMIT) {
+			if (avail < 1 || avail > GameConstants.RECEIVE_DATA_LIMIT) {
 				return;
 			}
 			byte[] buffer = new byte[avail];

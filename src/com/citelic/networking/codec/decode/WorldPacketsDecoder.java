@@ -53,7 +53,6 @@ import com.citelic.utility.DisplayNames;
 import com.citelic.utility.IPBanL;
 import com.citelic.utility.IPMute;
 import com.citelic.utility.Logger;
-import com.citelic.utility.LoggingSystem;
 import com.citelic.utility.PkRank;
 import com.citelic.utility.SerializableFilesManager;
 import com.citelic.utility.Utilities;
@@ -1844,7 +1843,6 @@ public final class WorldPacketsDecoder extends Decoder {
 						player.getDisplayName() + " is currently offline.");
 				return;
 			}
-			LoggingSystem.logPm(player, p2, Utilities.fixChatMessage(message));
 			player.getFriendsIgnores().sendMessage(p2,
 					Utilities.fixChatMessage(message));
 				break;
@@ -1921,7 +1919,6 @@ public final class WorldPacketsDecoder extends Decoder {
 							.fixChatMessage(message), effects));
 				}
 				player.setLastPublicMessage(Utilities.currentTimeMillis() + 300);
-				LoggingSystem.logPublicChat(player, message);
 				if (GameConstants.DEBUG)
 					Logger.log(this, "Chat type: " + chatType);
 				break;

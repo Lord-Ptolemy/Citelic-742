@@ -147,7 +147,7 @@ public final class LoginPacketsDecoder extends Decoder {
 			session.getLoginPackets().sendClientPacket(3);
 			return;
 		}
-		if (Engine.getPlayers().size() >= GameConstants.SV_PLAYERS_LIMIT - 10) {
+		if (Engine.getPlayers().size() >= GameConstants.PLAYERS_LIMIT - 10) {
 			session.getLoginPackets().sendClientPacket(7);
 			return;
 		}

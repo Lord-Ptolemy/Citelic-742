@@ -28,7 +28,7 @@ public final class LocalNPCUpdate {
 			if (indexes == null)
 				continue;
 			for (int npcIndex : indexes) {
-				if (localNPCs.size() == GameConstants.SV_LOCAL_NPCS_LIMIT)
+				if (localNPCs.size() == GameConstants.LOCAL_NPCS_LIMIT)
 					break;
 				NPC n = Engine.getNPCs().get(npcIndex);
 				if (n == null || n.hasFinished() || localNPCs.contains(n)

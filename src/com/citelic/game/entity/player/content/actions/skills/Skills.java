@@ -162,26 +162,19 @@ public final class Skills implements Serializable {
 	}
 
 	public int getCombatLevel() {
-		int attack = getLevelForXp(0);
-		int defence = getLevelForXp(1);
-		int strength = getLevelForXp(2);
-		int hp = getLevelForXp(3);
-		int prayer = getLevelForXp(5);
-		int ranged = getLevelForXp(4);
-		int magic = getLevelForXp(6);
-		int combatLevel = 3;
-		combatLevel = (int) ((defence + hp + Math.floor(prayer / 2)) * 0.25) + 1;
-		double melee = (attack + strength) * 0.325;
-		double ranger = Math.floor(ranged * 1.5) * 0.325;
-		double mage = Math.floor(magic * 1.5) * 0.325;
-		if (melee >= ranger && melee >= mage) {
-			combatLevel += melee;
-		} else if (ranger >= melee && ranger >= mage) {
-			combatLevel += ranger;
-		} else if (mage >= melee && mage >= ranger) {
-			combatLevel += mage;
-		}
-		return combatLevel;
+        int attack = getLevelForXp(Skills.ATTACK);
+        int defence = getLevelForXp(Skills.DEFENCE);
+        int strength = getLevelForXp(Skills.STRENGTH);
+        int hp = getLevelForXp(Skills.HITPOINTS);
+        int prayer = getLevelForXp(Skills.PRAYER);
+        int ranged = getLevelForXp(Skills.RANGE);
+        int magic = getLevelForXp(Skills.MAGIC);
+        int combatLevel = (int) Math.floor(0.25
+                        * (defence + hp + Math.floor(prayer / 2))
+                        + Math.max(0.325 * (attack + strength), Math.max(
+                                        0.325 * (Math.floor(ranged / 2) + ranged),
+                                        0.325 * (Math.floor(magic / 2) + magic))));
+        return combatLevel;
 	}
 
 	public int getCombatLevelWithSummoning() {

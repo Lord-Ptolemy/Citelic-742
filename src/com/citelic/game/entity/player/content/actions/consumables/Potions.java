@@ -394,14 +394,14 @@ public final class Potions {
 		ENERGY_POTION() {
 			@Override
 			public void extra(Player player) {
-				int restoredEnergy = player.getRunEnergy() + 20;
+				double restoredEnergy = player.getRunEnergy() + 20;
 				player.setRunEnergy(restoredEnergy > 100 ? 100 : restoredEnergy);
 			}
 		},
 		SUPER_ENERGY() {
 			@Override
 			public void extra(Player player) {
-				int restoredEnergy = player.getRunEnergy() + 40;
+				double restoredEnergy = player.getRunEnergy() + 40;
 				player.setRunEnergy(restoredEnergy > 100 ? 100 : restoredEnergy);
 			}
 		},

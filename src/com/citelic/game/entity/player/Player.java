@@ -116,7 +116,6 @@ import com.citelic.networking.codec.decode.WorldPacketsDecoder;
 import com.citelic.networking.codec.decode.impl.ButtonHandler;
 import com.citelic.networking.codec.encode.WorldPacketsEncoder;
 import com.citelic.utility.Logger;
-import com.citelic.utility.LoggingSystem;
 import com.citelic.utility.MachineInformation;
 import com.citelic.utility.SerializableFilesManager;
 import com.citelic.utility.Utilities;
@@ -165,7 +164,7 @@ public class Player extends Entity {
 	/*
 	 * Energy Constants
 	 */
-	private byte runEnergy;
+	private double runEnergy;
 	private transient boolean running;
 	private transient boolean resting;
 	private transient boolean listening; 
@@ -681,9 +680,183 @@ public class Player extends Entity {
 			toggleLootShare();
 		}
 	}
+	
+	/**
+	 * Starts all running tasks.
+	 */
+	private void runTasks() {
+		startHealingTask();
+		startEnergizeTask();
+		startPrayerDraining();
+		startSkillRegeneration();
+		startSpecialAttackRegeneration();
+		startSummoningEffect();
+	}
+	
+	/**
+	 * Boolean to check the agility level 
+	 */
+	private boolean checkAgility;
 
+	/**
+	 * Starts the energize task
+	 */
+	private void startEnergizeTask() {
+		CoresManager.fastExecutor.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					if (this == null 
+							|| isDead() 
+							|| !isRunning() 
+							|| (checkAgility && getSkills().getLevel(Skills.AGILITY) < 70)) {
+						restoreRunEnergy();
+					}
+					checkAgility = !checkAgility;
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 1000);
+	}
+	
+	/**
+	 * Starts the healing task
+	 */
+	private void startHealingTask() {
+		CoresManager.fastExecutor.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					restoreHitPoints();
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 6000);
+	}
+	
+	/**
+	 * Starts the prayer draining task
+	 */
+	private void startPrayerDraining() {
+		CoresManager.fastExecutor.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					if (this == null || isDead()
+							|| !isRunning()) {
+						getPrayer().processPrayerDrain();
+					}
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 600);
+	}
+	
+	/**
+	 * Starts regeneration of the special attack
+	 */
+	private void startSpecialAttackRegeneration() {
+		CoresManager.fastExecutor.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+						if (this == null || isDead()
+								|| !isRunning()) {
+						getCombatDefinitions().restoreSpecialAttack();
+						}
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 30000);
+	}
+	
+	/**
+	 * Start regeneration of drained skills
+	 */
+	private void startSkillRegeneration() {
+		CoresManager.fastExecutor.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+						if (this == null || !isRunning()) {
+						int ammountTimes = getPrayer().usingPrayer(0, 8) ? 2
+								: 1;
+						if (isResting())
+							ammountTimes += 1;
+						boolean berserker = getPrayer()
+								.usingPrayer(1, 5);
+						for (int skill = 0; skill < 25; skill++) {
+							if (skill == Skills.SUMMONING)
+								continue;
+							for (int time = 0; time < ammountTimes; time++) {
+								int currentLevel = getSkills().getLevel(
+										skill);
+								int normalLevel = getSkills()
+										.getLevelForXp(skill);
+								if (currentLevel > normalLevel) {
+									if (skill == Skills.ATTACK
+											|| skill == Skills.STRENGTH
+											|| skill == Skills.DEFENCE
+											|| skill == Skills.RANGE
+											|| skill == Skills.MAGIC) {
+										if (berserker
+												&& Utilities.getRandom(100) <= 15)
+											continue;
+									}
+									getSkills().set(skill,
+											currentLevel - 1);
+								} else if (currentLevel < normalLevel)
+									getSkills().set(skill,
+											currentLevel + 1);
+								else
+									break;
+							}
+						}
+						}
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 30000);
+	}
+	
+	private void startSummoningEffect() {
+		CoresManager.slowExecutor.scheduleWithFixedDelay(new Runnable() {
+			@Override
+			public void run() {
+				try {
+						if (this == null || getFamiliar() == null
+								|| isDead() || !hasFinished()) {
+						if (getFamiliar().getOriginalId() == 6814) {
+							heal(20);
+							setNextGraphics(new Graphics(1507));
+						}
+					}
+				} catch (Throwable e) {
+					Logger.handle(e);
+				}
+			}
+		}, 0, 15, TimeUnit.SECONDS);
+	}
+	
 	public void drainRunEnergy() {
-		setRunEnergy(runEnergy - 1);
+		double base = 0.7;
+        double weight = Utilities.getWeight(this);
+        double calc = base + (weight * 0.00729166);
+        
+        if (calc > 1.4) calc = 1.4;
+        
+        runEnergy -= calc;
+        
+        if (runEnergy < 0) runEnergy = 0;
+
+        getPackets().sendRunEnergy();
+        if (GameConstants.DEBUG)
+        	System.out.println("Calc: " + calc + " Base: " + base + " Weight: " + weight + " Energy: " + runEnergy);
 	}
 
 	@Override
@@ -1290,7 +1463,7 @@ public class Player extends Entity {
 		return rocktailsCooked;
 	}
 
-	public byte getRunEnergy() {
+	public double getRunEnergy() {
 		return runEnergy;
 	}
 
@@ -3040,6 +3213,7 @@ public class Player extends Entity {
 		getPackets().sendGameMessage(
 				"Welcome to " + GameConstants.SERVER_NAME + ".");
 		// TODO Auto-generated method stub
+		runTasks();
 		getFarming().updateAllPatches(this);
 		getPackets().sendItemsLook();
 		getPackets().sendConfig(281, 1000);
@@ -3081,7 +3255,6 @@ public class Player extends Entity {
 		getPlayerAppearance().generateAppearenceData();
 		getControllerManager().login();
 		OwnedObjectManager.linkKeys(this);
-		LoggingSystem.logIP(this);
 		getLodeStones().checkActivation();
 		toggleLootShare(false);
 
@@ -4048,7 +4221,7 @@ public class Player extends Entity {
 		}
 	}
 
-	public void setRunEnergy(int runEnergy) {
+	public void setRunEnergy(double runEnergy) {
 		this.runEnergy = (byte) runEnergy;
 		getPackets().sendRunEnergy();
 	}

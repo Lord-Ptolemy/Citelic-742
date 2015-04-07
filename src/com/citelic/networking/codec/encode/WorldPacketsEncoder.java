@@ -1108,7 +1108,7 @@ public class WorldPacketsEncoder extends Encoder {
 	public void sendRunEnergy() {
 		OutputStream stream = new OutputStream(2);
 		stream.writeFixedPacket(player, 69);
-		stream.writeByte(player.getRunEnergy());
+		stream.writeByte((byte) player.getRunEnergy());
 		session.write(stream);
 	}
 

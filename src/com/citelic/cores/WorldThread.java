@@ -29,7 +29,7 @@ public final class WorldThread extends Thread {
 					if (player == null || !player.isActive()
 							|| player.hasFinished())
 						continue;
-					if (currentTime - player.getPacketsDecoderPing() > GameConstants.SV_MAX_PACKETS_DECODER_PING_DELAY
+					if (currentTime - player.getPacketsDecoderPing() > GameConstants.MAX_PACKETS_DECODER_PING_DELAY
 							&& player.getSession().getChannel().isOpen())
 						player.getSession().getChannel().close();
 					player.processEntity();

@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit;
 import com.citelic.GameConstants;
 import com.citelic.GameServer;
 import com.citelic.cores.CoresManager;
-import com.citelic.game.engine.task.EngineTask;
-import com.citelic.game.engine.task.EngineTaskManager;
 import com.citelic.game.entity.Animation;
 import com.citelic.game.entity.Entity;
 import com.citelic.game.entity.EntityList;
@@ -99,10 +97,10 @@ public final class Engine {
 	public static long currentTime;
 
 	private static final EntityList<Player> players = new EntityList<Player>(
-			GameConstants.SV_PLAYERS_LIMIT);
+			GameConstants.PLAYERS_LIMIT);
 
 	private static final EntityList<NPC> npcs = new EntityList<NPC>(
-			GameConstants.SV_NPCS_LIMIT);
+			GameConstants.NPCS_LIMIT);
 	private static final Map<Integer, Region> regions = Collections
 			.synchronizedMap(new HashMap<Integer, Region>());
 
@@ -111,7 +109,7 @@ public final class Engine {
 	private static final Object LOCK = new Object();
 
 	private static final EntityList<Player> lobbyPlayers = new EntityList<Player>(
-			GameConstants.SV_PLAYERS_LIMIT);
+			GameConstants.PLAYERS_LIMIT);
 
 	public static List<Tile> restrictedTiles = new ArrayList<Tile>();
 
@@ -143,24 +141,6 @@ public final class Engine {
 				}
 			}
 		}, 5, 5, TimeUnit.MINUTES);
-	}
-
-	private static final void addDrainPrayerTask() {
-		CoresManager.fastExecutor.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null || player.isDead()
-								|| !player.isRunning())
-							continue;
-						player.getPrayer().processPrayerDrain();
-					}
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 600);
 	}
 
 	private static final void addServerMessageEvent() {
@@ -400,50 +380,6 @@ public final class Engine {
 		}
 	}
 
-	private static final void addRestoreHitPointsTask() {
-		CoresManager.fastExecutor.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null || player.isDead()
-								|| !player.isRunning())
-							continue;
-						player.restoreHitPoints();
-					}
-					for (NPC npc : npcs) {
-						if (npc == null || npc.isDead() || npc.hasFinished())
-							continue;
-						npc.restoreHitPoints();
-					}
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 6000);
-	}
-
-	private static final void addRestoreRunEnergyTask() {
-		CoresManager.fastExecutor.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null
-								|| player.isDead()
-								|| !player.isRunning()
-								|| (checkAgility && player.getSkills()
-										.getLevel(Skills.AGILITY) < 70))
-							continue;
-						player.restoreRunEnergy();
-					}
-					checkAgility = !checkAgility;
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 1000);
-	}
 
 	private static void addRestoreShopItemsTask() {
 		CoresManager.slowExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -456,124 +392,6 @@ public final class Engine {
 				}
 			}
 		}, 0, 30, TimeUnit.SECONDS);
-	}
-
-	private static final void addRestoreSkillsTask() {
-		CoresManager.fastExecutor.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null || !player.isRunning())
-							continue;
-						int ammountTimes = player.getPrayer().usingPrayer(0, 8) ? 2
-								: 1;
-						if (player.isResting())
-							ammountTimes += 1;
-						boolean berserker = player.getPrayer()
-								.usingPrayer(1, 5);
-						for (int skill = 0; skill < 25; skill++) {
-							if (skill == Skills.SUMMONING)
-								continue;
-							for (int time = 0; time < ammountTimes; time++) {
-								int currentLevel = player.getSkills().getLevel(
-										skill);
-								int normalLevel = player.getSkills()
-										.getLevelForXp(skill);
-								if (currentLevel > normalLevel) {
-									if (skill == Skills.ATTACK
-											|| skill == Skills.STRENGTH
-											|| skill == Skills.DEFENCE
-											|| skill == Skills.RANGE
-											|| skill == Skills.MAGIC) {
-										if (berserker
-												&& Utilities.getRandom(100) <= 15)
-											continue;
-									}
-									player.getSkills().set(skill,
-											currentLevel - 1);
-								} else if (currentLevel < normalLevel)
-									player.getSkills().set(skill,
-											currentLevel + 1);
-								else
-									break;
-							}
-						}
-					}
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 30000);
-
-	}
-
-	/*
-	 * public static final void updatePlayers() { for (Player player :
-	 * World.getPlayers()) { if (player == null || !player.isRunning())
-	 * continue; player.getPackets().sendIComponentText(751, 16,
-	 * "Players Online: " + World.getPlayers().size()); } }
-	 */
-
-	private static final void addRestoreSpecialAttackTask() {
-
-		CoresManager.fastExecutor.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null || player.isDead()
-								|| !player.isRunning())
-							continue;
-						player.getCombatDefinitions().restoreSpecialAttack();
-					}
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 30000);
-	}
-
-	private static final void addSummoningEffectTask() {
-		CoresManager.slowExecutor.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					for (Player player : getPlayers()) {
-						if (player == null || player.getFamiliar() == null
-								|| player.isDead() || !player.hasFinished())
-							continue;
-						if (player.getFamiliar().getOriginalId() == 6814) {
-							player.heal(20);
-							player.setNextGraphics(new Graphics(1507));
-						}
-					}
-				} catch (Throwable e) {
-					Logger.handle(e);
-				}
-			}
-		}, 0, 15, TimeUnit.SECONDS);
-	}
-
-	public static void annouceEventMessageTask() {
-		EngineTaskManager.schedule(new EngineTask() {
-			int timesToAnnouceCommunityEvent = 0;
-
-			@Override
-			public void run() {
-				if (timesToAnnouceCommunityEvent == 4
-						|| !GameConstants.eventActive) {
-					stop();
-				}
-				timesToAnnouceCommunityEvent++;
-				if (GameConstants.eventActive)
-					Engine.sendWorldMessage(
-							"<img=7><col=FF0033>Community:</col><col=7D1616> An "
-									+ GameConstants.eventType
-									+ " event is being hosted, type ::event to teleport to the location.",
-							false);
-			}
-		}, 0, 120);
 	}
 
 	/*
@@ -1119,13 +937,7 @@ public final class Engine {
 	}
 
 	public static final void init() {
-		addRestoreRunEnergyTask();
-		addDrainPrayerTask();
 		addServerMessageEvent();
-		addRestoreHitPointsTask();
-		addRestoreSkillsTask();
-		addRestoreSpecialAttackTask();
-		addSummoningEffectTask();
 		addOwnedObjectsTask();
 		LivingRockCavern.init();
 		addRestoreShopItemsTask();
